@@ -1,2 +1,6 @@
 tags
 cpp/tags
+*.o
+*.out
+build/
+cmake-build*/
