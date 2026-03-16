@@ -1,0 +1,20 @@
+file(GLOB SRC_FILES CONFIGURE_DEPENDS
+	main.cpp
+)
+
+set_source_files_properties( ${SRC_FILES} PROPERTIES LANGUAGE CXX )
+
+#add_definitions( "-D__DEBUG__" )
+
+include_directories( ${COMMON_INCLUDES} ./ )
+
+link_libraries(
+	"-Wl,--start-group"
+	Common spdlog pthread prac_sync
+	"-Wl,--end-group"
+)
+
+add_executable(prac_sync_app ${SRC_FILES} )
+
+
+install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/prac_sync DESTINATION ${BIN_DIR} )

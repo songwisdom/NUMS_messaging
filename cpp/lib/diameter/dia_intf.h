@@ -1,0 +1,112 @@
+#ifndef _H_FLK_DIA_INTF_
+#define _H_FLK_DIA_INTF_
+#include "smpp_sock.h"
+
+enum DIA_INTF_ERROR_MESSAGES {
+    DIA_INTF_ROK = 0x00000000,
+    DIA_INTF_RINVMSGLEN = 0x00000001,
+    DIA_INTF_RINVCMDLEN = 0x00000002,
+    DIA_INTF_RINVCMDID = 0x00000003,
+    DIA_INTF_RINVBNDSTS = 0x00000004,
+    DIA_INTF_RALYBND = 0x00000005,
+    DIA_INTF_RINVPRTFLG = 0x00000006,
+    DIA_INTF_RINVREGDLVFLG = 0x00000007,
+    DIA_INTF_RSYSERR = 0x00000008,
+    DIA_INTF_RINVSRCADR = 0x0000000A,
+    DIA_INTF_RINVDSTADR = 0x0000000B,
+    DIA_INTF_RINVMSGID = 0x0000000C,
+    DIA_INTF_RBINDFAIL = 0x0000000D,
+    DIA_INTF_RINVPASWD = 0x0000000E,
+    DIA_INTF_RINVSYSID = 0x0000000F,
+    DIA_INTF_RCANCELFAIL = 0x00000011,
+    DIA_INTF_RREPLACEFAIL = 0x00000013,
+    DIA_INTF_RMSGQFUL   = 0x00000014,
+    DIA_INTF_RINVSERTYP = 0x00000015,
+    DIA_INTF_RINVNUMDESTS = 0x00000033,
+    DIA_INTF_RINVDLNAME = 0x00000034,
+    DIA_INTF_RINVDESTFLAG = 0x00000040,
+    DIA_INTF_RINVSUBREP = 0x00000042,
+    DIA_INTF_RINVESMCLASS = 0x00000043,
+    DIA_INTF_RCNTSUBDL = 0x00000044,
+    DIA_INTF_RSUBMITFAIL = 0x00000045,
+    DIA_INTF_RINVSRCTON = 0x00000048,
+    DIA_INTF_RINVSRCNPI = 0x00000049,
+    DIA_INTF_RINVDSTTON = 0x00000050,
+    DIA_INTF_RINVDSTNPI = 0x00000051,
+    DIA_INTF_RINVSYSTYP = 0x00000053,
+    DIA_INTF_RINVREPFLAG = 0x00000054,
+    DIA_INTF_RINVNUMMSGS = 0x00000055,
+    DIA_INTF_RTHROTTLED = 0x00000058,
+    DIA_INTF_RINVSCHED = 0x00000061,
+    DIA_INTF_RINVEXPIRY = 0x00000062,
+    DIA_INTF_RINVDFTMSGID = 0x00000063,
+    DIA_INTF_RX_T_APPN = 0x00000064,
+    DIA_INTF_RX_P_APPN = 0x00000065,
+    DIA_INTF_RX_R_APPN = 0x00000066,
+    DIA_INTF_RQUERYFAIL = 0x00000067,
+    DIA_INTF_RINVTLVSTREAM = 0x000000C0,
+    DIA_INTF_RTLVNOTALLWD = 0x000000C1,
+    DIA_INTF_RINVTLVLEN = 0x000000C2,
+    DIA_INTF_RMISSINGTLV = 0x000000C3,
+    DIA_INTF_RINVTLVVAL = 0x000000C4,
+    DIA_INTF_RDELIVERYFAILURE = 0x000000FE,
+    DIA_INTF_RUNKNOWNERR = 0x000000FF,
+    DIA_INTF_RSERTYPUNAUTH = 0x00000100,
+    DIA_INTF_RPROHIBITED = 0x00000101,
+    DIA_INTF_RSERTYPUNAVAIL = 0x00000102,
+    DIA_INTF_RSERTYPDENIED = 0x00000103,
+    DIA_INTF_RINVDCS = 0x00000104,
+    DIA_INTF_RINVSRCADDRSUBUNIT = 0x00000105,
+    DIA_INTF_RINVDSTADDRSUBUNIT = 0x00000106,
+    DIA_INTF_RINVBCASTFREQINT = 0x00000107,
+    DIA_INTF_RINVBCASTALIAS_NAME = 0x00000108,
+    DIA_INTF_RINVBCASTAREAFMT = 0x00000109,
+    DIA_INTF_RINVNUMBCAST_AREAS = 0x0000010A,
+    DIA_INTF_RINVBCASTCNTTYPE = 0x0000010B,
+    DIA_INTF_RINVBCASTMSGCLASS = 0x0000010C,
+    DIA_INTF_RBCASTFAIL = 0x0000010D,
+    DIA_INTF_RBCASTQUERYFAIL = 0x0000010E,
+    DIA_INTF_RBCASTCANCELFAIL = 0x0000010F,
+    DIA_INTF_RINVBCAST_REP = 0x00000110,
+    DIA_INTF_RINVBCASTSRVGRP = 0x00000111,
+    DIA_INTF_RINVBCASTCHANIND = 0x00000112,
+};
+
+enum {
+    #define INTEGER(name, octets)
+    #define NULTERMINATED(name, max_octets)
+    #define OCTETS(name, field_giving_octets)
+    #define DIA_PDU(name, id, fields) name = id,
+    #include "dia_intf.def"
+    //DIA_INTF_PDU_DUMMY_TYPE
+};
+
+typedef struct DIA_INTF_PDU DIA_INTF_PDU;
+struct DIA_INTF_PDU {
+    u_int type;
+    const char *type_name;
+    union {
+        #define INTEGER(name, octets) u_int name;
+        #define NULTERMINATED(name, max_octets) Octstr *name;
+        #define OCTETS(name, field_giving_octets) Octstr *name;
+        #define DIA_PDU(name, id, fields) struct name { fields } name;
+        #include "dia_intf.def"
+    } u;
+};
+#define MIN_DIA_INTF_PDU_LEN    (4*4)
+/* old value was (1024). We need more because message_payload can be up to 64K octets*/
+#define MAX_DIA_INTF_PDU_LEN    (7424)
+DIA_INTF_PDU *dia_intf_create(u_int type, u_int seq_no);
+DIA_INTF_PDU *dia_intf_resp_pdu_create(DIA_INTF_PDU *pdu);
+void dia_intf_destroy(DIA_INTF_PDU *pdu);
+Octstr *dia_intf_pack(DIA_INTF_PDU *pdu);
+DIA_INTF_PDU *dia_intf_unpack(Octstr *data_without_len);
+void dia_intf_dump(DIA_INTF_PDU *pdu);
+const char *dia_intf_error_to_string(enum DIA_INTF_ERROR_MESSAGES error);
+int dia_intf_read_len(Connection *conn);
+Octstr *dia_intf_read_data(Connection *conn, int len);
+int send_dia_intf(Connection *conn, DIA_INTF_PDU *pdu);
+int read_dia_intf(Connection *conn, int *len, DIA_INTF_PDU **pdu);
+int read_dia_intf_timeout(Connection *conn, int *len, DIA_INTF_PDU **pdu, int tm_out);
+
+#endif

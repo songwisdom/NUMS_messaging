@@ -1,0 +1,348 @@
+
+/*
+   AVP_DEF(avp_name, avp_full_name, avp_code, vendor_id, mbit, pbit, data_type)
+*/
+
+AVP_DEF(session_id, Session-Id, 263, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(vendor_id, Vendor-Id, 266, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(auth_application_id, Auth-Application-Id, 258, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(acct_application_id, Acct-Application-Id, 259, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(vendor_specific_application_id, Vendor-Specific-Application-Id, 260, 0, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_LIST_OPTIONAL(vendor_id, 1, 0) 
+		AVP_GROUP_LIST_MANDANTORY(acct_application_id, 0, 1) 
+		AVP_GROUP_LIST_MANDANTORY(auth_application_id, 0, 1) )
+
+AVP_DEF(auth_session_state, Auth-Session-State, 277, 0, 1, 0, AVP_TYPE_ENUM, 
+	AVP_ENUM_TYPE(SESSION_MGMT, 0) 
+	AVP_ENUM_TYPE(SESSION_NOT_MGMT, 1) )
+
+AVP_DEF(origin_host, Origin-Host, 264, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(origin_realm, Origin-Realm, 296, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+
+AVP_DEF(destination_host, Destination-Host, 293, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(destination_realm, Destination-Realm, 283, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(sc_address, SC-Address, 3300, 10415, 1, 0, AVP_TYPE_OCTSTRING, )
+
+AVP_DEF(ofr_flags, OFR-Flags, 3328, 10415, 1, 0, AVP_TYPE_ENUM, 
+	AVP_ENUM_TYPE(source_node_mme, 0) 
+	AVP_ENUM_TYPE(source_node_sgsn, 1) )
+
+AVP_DEF(feature_list_id, Feature-List-Id, 629, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(feature_list, Feature-List, 630, 0, 1, 0, AVP_TYPE_ENUM, 
+	AVP_ENUM_TYPE(SiFC, 0) 
+	AVP_ENUM_TYPE(AliasInd, 1)
+	AVP_ENUM_TYPE(IMSRestorationInd, 2) 
+	AVP_ENUM_TYPE(P_CSCF_Restoration_mechanism, 3) )
+AVP_DEF(supported_features, Supported-Features, 628, 0, 1, 0, AVP_TYPE_GROUP, 
+		AVP_GROUP_MANDANTORY(vendor_id)
+		AVP_GROUP_MANDANTORY(feature_list_id)
+		AVP_GROUP_MANDANTORY(feature_list) )
+
+AVP_DEF(user_name, User-Name, 1, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(msisdn, MSISDN, 701, 10415, 1, 0 , AVP_TYPE_OCTSTRING, )
+AVP_DEF(external_identifier, External-Identifier, 3111, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(lmsi, LMSI, 2400, 0, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(user_identifier, User-Identifier, 3102, 10415, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_OPTIONAL(user_name)
+		AVP_GROUP_OPTIONAL(msisdn)
+		AVP_GROUP_OPTIONAL(external_identifier)
+		AVP_GROUP_OPTIONAL(lmsi) )
+
+//AVP_DEF(sm_rp_ui, SM-RP-UI, 3301, 0, 1, 0, AVP_TYPE_OCTSTRING, )
+// ADD HW
+AVP_DEF(sm_rp_ui, SM-RP-UI, 3301, 10415, 1, 0, AVP_TYPE_OCTSTRING, )
+
+AVP_DEF(hss_id, HSS-ID, 3325, 1, 0, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(origination_sip_uri, Originating-SIP-URI, 3326, 10415, 0, 0 , AVP_TYPE_UTF8STRING, )
+AVP_DEF(destination_sip_uri, Destination-SIP-URI, 3327, 10415, 0, 0 , AVP_TYPE_UTF8STRING, )
+AVP_DEF(smsmi_correlation_id, SMSMI-Correlation-ID, 3324, 1, 0, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_OPTIONAL(hss_id)
+		AVP_GROUP_OPTIONAL(origination_sip_uri)
+		AVP_GROUP_OPTIONAL(destination_sip_uri) )
+
+AVP_DEF(sm_delivery_outcome, SM-Delivery-Outcome, 3316, 10415, 1, 0, AVP_TYPE_GROUP, 
+		AVP_GROUP_OPTIONAL(mme_sm_delivery_outcome)
+		AVP_GROUP_OPTIONAL(msc_sm_delivery_outcome)
+		AVP_GROUP_OPTIONAL(sgsn_sm_delivery_outcome)
+		AVP_GROUP_OPTIONAL(ip_sm_gw_sm_delivery_outcome) )
+
+AVP_DEF(mme_sm_delivery_outcome, MME-SM-Delivery-Outcome, 3317, 10415, 1, 0, AVP_TYPE_GROUP, 
+		AVP_GROUP_OPTIONAL(sm_delivery_cause)
+		AVP_GROUP_OPTIONAL(absent_user_diagnostic_sm) )
+AVP_DEF(msc_sm_delivery_outcome, MSC-SM-Delivery-Outcome, 3318, 10415, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_OPTIONAL(sm_delivery_cause)
+		AVP_GROUP_OPTIONAL(absent_user_diagnostic_sm) )
+AVP_DEF(sgsn_sm_delivery_outcome, SGSN-SM-Delivery-Outcome, 3319, 10415, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_OPTIONAL(sm_delivery_cause)
+		AVP_GROUP_OPTIONAL(absent_user_diagnostic_sm) )
+AVP_DEF(ip_sm_gw_sm_delivery_outcome, IP-SM-GW-SM-Delivery-Outcome, 3320, 10415, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_OPTIONAL(sm_delivery_cause)
+		AVP_GROUP_OPTIONAL(absent_user_diagnostic_sm) )
+
+AVP_DEF(sm_delivery_cause, SM-Delivery-Cause, 3321, 10415, 1, 0, AVP_TYPE_ENUM,
+		AVP_ENUM_TYPE(UE_MEMORY_CAPACITY_EXCEEDED, 0)
+		AVP_ENUM_TYPE(ABSENT_USER, 1)
+		AVP_ENUM_TYPE(SUCCESSFUL_TRANSFER, 2) )
+
+AVP_DEF(absent_user_diagnostic_sm, Absent-User-Diagnostic-SM, 3322, 10415, 1, 0, AVP_TYPE_UINT32, ) // TODO. error code define
+
+
+AVP_DEF(service_imsi, Service-IMSI, 12101, 5806, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(proxy_host, Proxy-Host, 280, 0, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(proxy_state, Proxy-State, 33, 0, 1, 0, AVP_TYPE_OCTSTRING, ) // TODO . type check 
+AVP_DEF(proxy_info, Proxy-Info, 284, 0, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_MANDANTORY(proxy_host)
+		AVP_GROUP_MANDANTORY(proxy_state) )
+AVP_DEF(route_record, Route-Record, 282, 0, 1, 0, AVP_TYPE_OCTSTRING, ) // TODO, type check
+		
+AVP_DEF(result_code, Result-Code, 268, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(experimental_result_code, Expeimental-Result-Code, 298, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(experimental_result, Experimental-Result, 297, 0, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_MANDANTORY(vendor_id)
+		AVP_GROUP_MANDANTORY(experimental_result_code) )
+
+AVP_DEF(sm_enumerated_delivery_failure_cause, SM-Enumerated-Delivery-Failure-Cause, 3304, 10415, 1, 0, AVP_TYPE_ENUM,
+		AVP_ENUM_TYPE(MEMORY_CAPACITY_EXCEEDED, 0)
+		AVP_ENUM_TYPE(EQUIPMENT_PROTOCOL_ERROR, 1)
+		AVP_ENUM_TYPE(EQUIPMENT_NOT_SM_EQUIPPED, 2)
+		AVP_ENUM_TYPE(UNKNOWN_SERVICE_CENTRE, 3)
+		AVP_ENUM_TYPE(SC_CONGESTION, 4)
+		AVP_ENUM_TYPE(INVALID_SME_ADDRESS, 5)
+		AVP_ENUM_TYPE(USER_NOT_SC_USER, 6) )
+AVP_DEF(sm_diagnostic_info, SM-Diagnostic-Info, 3305, 10415, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(sm_delivery_failure_cause, SM-Delivery-Failure-Cause, 3303, 10415, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_MANDANTORY(sm_enumerated_delivery_failure_cause)
+		AVP_GROUP_OPTIONAL(sm_diagnostic_info) )
+
+AVP_DEF(failed_avp, Failed-AVP, 279, 0, 1, 0, AVP_TYPE_GROUP, //TODO. can be included all avps
+	   )
+
+AVP_DEF(tfr_flags, TFR-Flags, 3302, 10415, 1, 0, AVP_TYPE_UINT32, )
+
+AVP_DEF(sm_delivery_timer, SM-Delivery-Timer, 3306, 10415, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(sm_delivery_start_time, SM-Delivery-Start-Time, 3307, 10415, 1, 0, AVP_TYPE_TIME, )
+
+AVP_DEF(host_ip_address, Host-IP-Address, 257, 0, 1, 0, AVP_TYPE_ADDRESS, )
+AVP_DEF(product_name, Product-Name, 269, 0, 0, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(origin_state_id, Origin-State-Id, 278, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(supported_vendor_id, Supported-Vendor-Id, 265, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(inband_security_id, Inband-Security-Id, 299, 0, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(firmware_revision, Firmware-Revision, 267, 0, 0, 0, AVP_TYPE_UINT32, )
+AVP_DEF(error_message, Error-Message, 281, 0, 0, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(disconnect_cause, Disconnect-Cause, 273, 0, 1, 0, AVP_TYPE_ENUM, 
+		AVP_ENUM_TYPE(REBOOTING, 0)
+		AVP_ENUM_TYPE(BUSY, 1)
+		AVP_ENUM_TYPE(DO_NOT_WANT_TO_TALK_TO_YOU, 2)
+		) 
+//AVP_DEF(original_state_id, Origin-State-Id, 278, 0, 1, 0, AVP_TYPE_UINT32, )
+
+// SKT Defined AVP
+AVP_DEF(skt_osfi, Originating-Service-Feature-Indicator, 1700, 5806, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(skt_sms_osfi, SMS-Originating-Service-Feature-Indicator, 1701, 5806, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(skt_roam_ind, SKT-SMS-Roaming-Indicator, 2201, 5806, 1, 0, AVP_TYPE_ENUM, )
+AVP_DEF(skt_sms_roam_pmn, SKT-SMS-Roaming-PMN, 2202, 5806, 1, 0, AVP_TYPE_OCTSTRING, )
+
+AVP_DEF(srr_flags, SRR-Flags, 3310, 10415, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(mwd_status, MWD-Status, 3312, 10415, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(mme_absent_user_diagnostic_sm, MME-Absent-User-Diagnostic-SM, 3313, 10415, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(msc_absent_user_diagnostic_sm, MSC-Absent-User-Diagnostic-SM, 3314, 10415, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(sgsn_absent_user_diagnostic_sm, SGSN-Absent-User-Diagnostic-SM, 3315, 0, 1, 0, AVP_TYPE_UINT32, )
+
+AVP_DEF(sgsn_name, SGSN-Name, 2409, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(sgsn_realm, SGSN-Realm, 2410, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(sgsn_number, SGSN-Number, 1489, 0, 1, 0, AVP_TYPE_OCTSTRING, )
+
+AVP_DEF(mme_name, MME-Name, 2402, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(mme_realm, MME-Realm, 2408, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+// ADD HW	
+//AVP_DEF(mme_number_for_mt_sms, MME-Number-for-MT-SMS, 1645, 0, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(mme_number_for_mt_sms, MME-Number-for-MT-SMS, 1645, 10415, 0, 0, AVP_TYPE_OCTSTRING, )
+
+AVP_DEF(msc_number, MSC-Number, 2403, 0, 1, 0, AVP_TYPE_OCTSTRING, )
+
+AVP_DEF(ip_sm_gw_number, IP-SM-GW-Number, 3100, 0, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(ip_sm_gw_name, IP-SM-GW-Name, 3101, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(ip_sm_gw_realm, IP-SM-GW-Realm, 3112, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+//AVP_DEF(3gpp_aaa_server_name, 3GPP-AAA-Server-Name, 318, 0, 1, 0, AVP_TYPE_UTF8STRING, )
+//AVP_DEF(lcs_capabilities_sets, LCS-Capabilities-Sets, 2404, 0, 1, 0, AVP_TYPE_UINT32, )
+//AVP_DEF(gmlc_address, GMLC-Address, 2405, 0, 1, 0, AVP_TYPE_OCTSTRING, )
+
+AVP_DEF(serving_node, Serving-Node, 2401, 0, 1, 0, AVP_TYPE_GROUP,
+        AVP_GROUP_OPTIONAL(sgsn_number)
+        AVP_GROUP_OPTIONAL(sgsn_name)
+        AVP_GROUP_OPTIONAL(sgsn_realm)
+        AVP_GROUP_OPTIONAL(mme_name)
+        AVP_GROUP_OPTIONAL(mme_realm)
+        AVP_GROUP_OPTIONAL(mme_number_for_mt_sms)
+        AVP_GROUP_OPTIONAL(msc_number)
+        AVP_GROUP_OPTIONAL(ip_sm_gw_number)
+        AVP_GROUP_OPTIONAL(ip_sm_gw_name)
+        AVP_GROUP_OPTIONAL(ip_sm_gw_realm) )
+
+AVP_DEF(additional_serving_node, Additional-Serving-Node, 2406, 0, 1, 0, AVP_TYPE_GROUP,
+        AVP_GROUP_OPTIONAL(sgsn_number)
+        AVP_GROUP_OPTIONAL(sgsn_name)
+        AVP_GROUP_OPTIONAL(sgsn_realm)
+        AVP_GROUP_OPTIONAL(mme_name)
+        AVP_GROUP_OPTIONAL(mme_realm)
+        AVP_GROUP_OPTIONAL(mme_number_for_mt_sms)
+        AVP_GROUP_OPTIONAL(msc_number)
+        AVP_GROUP_OPTIONAL(ip_sm_gw_number)
+        AVP_GROUP_OPTIONAL(ip_sm_gw_name)
+        AVP_GROUP_OPTIONAL(ip_sm_gw_realm) )
+
+AVP_DEF(maximum_ue_availability_time, Maximum-UE-Availability-Time, 3329, 10415, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(sms_gmsc_alert_event, SMS-GMSC-Alert-Event, 3333, 10415, 1, 0, AVP_TYPE_UINT32, )
+
+AVP_DEF(rdr_flags, RDR-Flags, 3323, 0, 1, 0, AVP_TYPE_UINT32, )
+
+//SKT 정의 규격
+AVP_DEF(cdma_min, CDMA-MIN, 1800, 5806, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(cdma_esn, CDMA-ESN, 1801, 5806, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(sms_capability, SMS-CAPABILITY, 1802, 5806, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(np_forward_information, NP-Forward-Information, 1803, 5806, 1, 0, AVP_TYPE_INT32, )
+AVP_DEF(sms_access_denied_reason, SMS-Access-Denied-Reason, 1804, 5806, 1, 0, AVP_TYPE_INT32, )
+AVP_DEF(secondary_msisdn, Secondary-MSISDN, 1805, 5806, 1, 0, AVP_TYPE_OCTSTRING, )
+AVP_DEF(additional_request_subscriber_info, ADD_REQ_SUB_INFO, 1806, 5806, 1, 0, AVP_TYPE_INT32, )
+
+// Diameter Sh	
+AVP_DEF(data_reference, Data-Reference, 703, 10415, 1, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(RepositoryData ,0)
+    AVP_ENUM_TYPE(IMSPublicIdentity ,10)
+    AVP_ENUM_TYPE(IMSUserState ,11)
+    AVP_ENUM_TYPE(SCSCFName ,12)
+    AVP_ENUM_TYPE(InitialFilterCriteria ,13)
+    AVP_ENUM_TYPE(LocationInformation ,14)
+    AVP_ENUM_TYPE(UserState ,15)
+    AVP_ENUM_TYPE(ChargingInformation ,16)
+    AVP_ENUM_TYPE(MSISDN ,17)
+    AVP_ENUM_TYPE(PSIActivation ,18)
+    AVP_ENUM_TYPE(DSAI ,19)
+    AVP_ENUM_TYPE(ServiceLevelTraceInfo ,21)
+    AVP_ENUM_TYPE(IPAddressSecureBindingInformation ,22)
+    AVP_ENUM_TYPE(ServicePriorityLevel ,23)
+    AVP_ENUM_TYPE(SMSRegistrationInfo ,24)
+    AVP_ENUM_TYPE(UEReachabilityForIP ,25)
+    AVP_ENUM_TYPE(TADSinformation ,26)
+    AVP_ENUM_TYPE(STNSR ,27)
+    AVP_ENUM_TYPE(UESRVCCCapability ,28)
+    AVP_ENUM_TYPE(ExtendedPriority ,29)
+    AVP_ENUM_TYPE(CSRN ,30)
+    AVP_ENUM_TYPE(ReferenceLocationInformation ,31)
+    AVP_ENUM_TYPE(IMSI ,32)
+    AVP_ENUM_TYPE(IMSPrivateUserIdentity ,33)
+)
+AVP_DEF(subs_req_type, Subs-Req-Type, 705, 10415, 1, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(Subscribe ,0)
+    AVP_ENUM_TYPE(Unsubscribe ,1)
+)
+AVP_DEF(requested_domain, Requested-Domain, 706, 10415, 1, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(CS_Domain,0)
+	AVP_ENUM_TYPE(PS_Domain,1)
+)
+AVP_DEF(current_location, Current-Location, 707, 10415, 1, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(DoNotNeedInitiateActiveLocationRetrieval,0)
+	AVP_ENUM_TYPE(InitiateActiveLocationRetrieval,1)
+)
+AVP_DEF(identity_set, Identity-Set, 708, 10415, 0, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(ALL_IDENTITIES,0)
+	AVP_ENUM_TYPE(REGISTERED_IDENTITIES,1)
+	AVP_ENUM_TYPE(IMPLICIT_IDENTITIES,2)
+	AVP_ENUM_TYPE(ALIAS_IDENTITIES,3)
+)
+AVP_DEF(send_data_indication, Send-Data-Indication, 710, 10415, 0, 0 , AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(USER_DATA_NOT_REQUESTED, 0)
+    AVP_ENUM_TYPE(USER_DATA_REQUESTED,1)
+)
+AVP_DEF(one_time_notification, One-Time-Notification, 712, 10415, 0, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(ONE_TIME_NOTIFICATION_REQUESTED ,0)
+)
+AVP_DEF(serving_node_indication, Serving-Node-Indication, 714, 10415, 0, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(ONLY_SERVING_NODES_REQUIRED,0)
+)
+AVP_DEF(pre_paging_supported, Pre-paging-Supported, 717, 10415, 0, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(PREPAGING_NOT_SUPPORTED,0)
+    AVP_ENUM_TYPE(PREPAGING_SUPPORTED,1)
+)
+AVP_DEF(local_time_zone_indication, Local-Time-Zone-Indication, 718, 10415, 0, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(ONLY_LOCAL_TIME_ZONE_REQUESTED,0)
+    AVP_ENUM_TYPE(LOCAL_TIME_ZONE_WITH_LOCATION_INFO_REQUESTED,1)
+)
+
+
+
+
+AVP_DEF(oc_report_type, OC-Report-Type, 626, 10415, 1, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(HOST_REPORT,0)
+    AVP_ENUM_TYPE(REALM_REPORT,1)
+)
+AVP_DEF(load_type, Load-Type, 651, 10415, 1, 0, AVP_TYPE_ENUM,
+    AVP_ENUM_TYPE(HOST,0)
+    AVP_ENUM_TYPE(PEER,1)
+)
+
+
+AVP_DEF(service_indication, Service-Indication, 704, 10415, 1, 0 , AVP_TYPE_OCTSTRING, )
+AVP_DEF(server_name, Server-Name, 602, 10415, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(public_identity, Public-Identity, 601, 10415, 1, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(dsai_tag, DSAI-Tag, 711, 10415, 1, 0 , AVP_TYPE_OCTSTRING, )
+AVP_DEF(requested_nodes, Requested-Nodes, 713, 10415, 0, 0, AVP_TYPE_UINT32, )
+AVP_DEF(sequence_number, Sequence-Number, 716, 10415, 0, 0 , AVP_TYPE_UINT32, )
+AVP_DEF(udr_flags, UDR-Flags, 719, 10415, 0, 0, AVP_TYPE_UINT32, )
+AVP_DEF(call_reference_number, Call-Reference-Number, 721, 10415, 0, 0, AVP_TYPE_UINT32, )
+AVP_DEF(as_number, AS-Number, 722, 10415, 1, 0 , AVP_TYPE_OCTSTRING, )
+AVP_DEF(user_data, User-Data, 702, 10415, 1, 0 , AVP_TYPE_OCTSTRING, )
+
+AVP_DEF(load_value, Load-Value, 652, 10415, 1, 0, AVP_TYPE_UINT64, )
+AVP_DEF(oc_reduction_percentage, OC-Reduction-Percentage, 627, 10415, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(oc_validity_duration, OC-Validity-Duration, 625, 10415, 1, 0, AVP_TYPE_UINT32, )
+AVP_DEF(oc_sequence_number, OC-Sequence-Number, 624, 10415, 1, 0, AVP_TYPE_UINT64, )
+AVP_DEF(oc_feature_vector, OC-Feature-Vector, 622, 10415, 1, 0, AVP_TYPE_UINT64, )
+AVP_DEF(wildcarded_public_identity, Wildcarded-Public-Identity, 634, 10415, 0, 0, AVP_TYPE_UTF8STRING, )
+AVP_DEF(wildcarded_impu, Wildcarded-IMPU, 636, 10415, 1, 0, AVP_TYPE_UTF8STRING, )
+
+
+AVP_DEF(repository_data_id, Repository-Data-ID, 715, 10415, 0, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_OPTIONAL(service_indication)
+		AVP_GROUP_OPTIONAL(sequence_number) )
+
+AVP_DEF(call_reference_info, Call-Reference-Info, 720, 10415, 0, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_MANDANTORY(call_reference_number)
+		AVP_GROUP_MANDANTORY(as_number) )
+
+AVP_DEF(user_identity, User-Identity, 700, 10415, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_OPTIONAL(public_identity)
+		AVP_GROUP_OPTIONAL(msisdn) )
+
+AVP_DEF(oc_supported_features, OC-Supported-Features, 621, 10415, 1, 0, AVP_TYPE_GROUP,
+		AVP_GROUP_OPTIONAL(oc_feature_vector) )
+
+AVP_DEF(sourceid, SourceID, 649, 10415, 1, 0, AVP_TYPE_GROUP, 
+		AVP_GROUP_OPTIONAL(load_type)
+		AVP_GROUP_OPTIONAL(load_value))
+// AVP_GROUP_OPTIONAL(sourceid) RFC 8581 not used
+
+AVP_DEF(load, Load, 650, 10415, 1, 0, AVP_TYPE_GROUP, 
+		AVP_GROUP_OPTIONAL(load_type)
+		AVP_GROUP_OPTIONAL(load_value)
+		AVP_GROUP_OPTIONAL(sourceid) )
+
+AVP_DEF(oc_olr, OC-OLR, 623, 10415, 1, 0, AVP_TYPE_GROUP,
+		INTF_AVP_FIX( oc_sequence_number )
+		INTF_AVP_FIX( oc_report_type )
+		AVP_GROUP_OPTIONAL(oc_reduction_percentage)
+		AVP_GROUP_OPTIONAL(oc_validity_duration))
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,143 @@
+#ifndef DIA_PDU
+#error Macro DIA_PDU not defined.
+#endif
+
+#ifndef INTEGER
+#error Macro INTEGER not defined.
+#endif
+
+#ifndef NULTERMINATED
+#error Macro NULTERMINATED not defined.
+#endif
+
+#ifndef OCTETS
+#error Macro OCTETS not defined.
+#endif
+
+/*
+ * All SMPP DIA_PDUs have a common header consisting of four integers.
+ * The first integer, command_length, is dealt with implicitly by
+ * the I/O stuff, so we dont store it in the DIA_PDU data structure.
+ * The other three are defined in the HEADER macro.
+ */
+#ifdef HEADER
+#error Macro HEADER was already defined.
+#endif
+#define HEADER	\
+    INTEGER(command_id, 4) \
+    INTEGER(command_status, 4) \
+    INTEGER(sequence_number, 4)
+
+DIA_PDU(dia_bind_transceiver,
+    0x00000009,
+    HEADER
+    NULTERMINATED(system_id, 16)
+    NULTERMINATED(system_type, 13)
+    INTEGER(interface_version, 1)
+	INTEGER(applicationid, 4)
+)
+
+DIA_PDU(dia_bind_transceiver_resp,
+    0x80000009,
+    HEADER
+    NULTERMINATED(system_id, 16)
+)
+
+DIA_PDU(dia_outbind,
+    0x0000000B,
+    HEADER
+    NULTERMINATED(system_id, 16)
+    NULTERMINATED(password, 9)
+)
+
+DIA_PDU(dia_unbind,
+    0x00000006,
+    HEADER
+	NULTERMINATED(system_id, 16)
+	NULTERMINATED(system_type, 13)
+)
+
+DIA_PDU(dia_unbind_resp,
+    0x80000006,
+    HEADER
+	NULTERMINATED(system_id, 16)
+	NULTERMINATED(system_type, 13)
+)
+
+DIA_PDU(dia_generic_nack,
+    0x80000000,
+    HEADER
+)
+
+DIA_PDU(dia_forward_sm,
+    0x00000021,
+    HEADER
+    NULTERMINATED(source_host, 64)
+    NULTERMINATED(dest_host, 64)
+	INTEGER(diameter_len, 4)
+    OCTETS(diameter, diameter_len)
+)
+
+DIA_PDU(dia_forward_sm_resp,
+    0x80000021,
+    HEADER
+    NULTERMINATED(source_host, 64)
+    NULTERMINATED(dest_host, 64)
+	INTEGER(diameter_len, 4)
+    OCTETS(diameter, diameter_len)
+)
+/*
+DIA_PDU(dia_ofr,
+		0x00800025,
+		HEADER
+		NULTERMINATED(source_host, 32)
+		NULTERMINATED(dest_host, 32)
+		INTEGER(diameter_len, 4)
+		OCTETS(diameter, diameter_len)
+)
+DIA_PDU(dia_ofa,
+		0x80800025,
+		HEADER
+		NULTERMINATED(source_host, 32)
+		NULTERMINATED(dest_host, 32)
+		INTEGER(diameter_len, 4)
+		OCTETS(diameter, diameter_len)
+)
+DIA_PDU(dia_tfr,
+		0x00800026,
+		HEADER
+		NULTERMINATED(source_host, 32)
+		NULTERMINATED(dest_host, 32)
+		NULTERMINATED(system_type, 13)
+		INTEGER(diameter_len, 4)
+		OCTETS(diameter, diameter_len)
+)
+DIA_PDU(dia_tfa,
+		0x80800026,
+		HEADER
+		NULTERMINATED(source_host, 32)
+		NULTERMINATED(dest_host, 32)
+		INTEGER(diameter_len, 4)
+		OCTETS(diameter, diameter_len)
+)
+*/
+
+DIA_PDU(dia_enquire_link,
+    0x00000015,
+    HEADER
+	NULTERMINATED(system_id, 16)
+	NULTERMINATED(system_type, 13)
+)
+
+DIA_PDU(dia_enquire_link_resp,
+    0x80000015,
+    HEADER
+	NULTERMINATED(system_id, 16)
+	NULTERMINATED(system_type, 13)
+)
+
+#undef DIA_PDU
+#undef INTEGER
+#undef NULTERMINATED
+#undef OCTETS
+#undef HEADER

@@ -1,0 +1,474 @@
+//*******************************************************************************
+//
+//     Copyright (c) 2003 FEELINGK Co., Ltd.
+//     All rights reserved.
+//
+//     This program contains confidential and proprietary information of
+//     FEELINGK, and any reproduction, disclosure, or use in whole or in part
+//     by prior written agreement or permission of FEELINGK.
+//
+//                            FEELINGK Co., Ltd.
+//     8F Taekyung B/D 42-42 Bongchun 10Dong Gwanak-Gu, Seoul 151-060 Korea
+//
+//******************************************************************************
+
+//--------------------------------------------------------------------
+//
+//  FILE     NAME   : StatisticsTable.h
+//  PURPOSE         : SMS Statistics Table Header file
+//  INPUT ARGUMENTS :
+//  RETURN VALUE    :
+//  CALLED FROM     :
+//  USED GLOBAL VARIABLES :
+//    1) EXTERNAL
+//    2) LOCAL
+//  REVISION        :
+//      BY              WHEN        REASON
+//      --------------  ----------  -------------------
+//      smyang          2003.4.      First Coding
+//
+//----------------------------------------------------------------------
+
+#ifndef _STAT_TABLE_H_
+#define _STAT_TABLE_H_
+
+#include <FLKBaseDef.h>
+
+// Temporary Define in this file
+// later move this define to SmsIpc.h
+
+// OID SET MACRO
+#define     DB_STATISTIC_OID_ZERO_POINT      		0
+#define     DB_STATISTIC_OID_ONE_POINT       		1
+
+//***********************************************************************
+//        SMS Statistics Table Strucutre
+//***********************************************************************
+#define     DB_STATISTIC_SMSC_OID_ID             	0x00
+#define     DB_STATISTIC_RESERVED_ID             	0x01
+#define     DB_STATISTIC_CUR_TIME_ID             	0x02
+#define     DB_STATISTIC_CUR_VALUE_ID            	0x03
+#define     DB_STATISTIC_OLD_TIME_ID             	0x04
+#define     DB_STATISTIC_OLD_VALUE_ID            	0x05
+#define     DB_STATISTIC_OID_TWO_TYPE_ID   			0x06
+#define     DB_STATISTIC_OID_TWO_SIZE_ID   			0x07
+#define     DB_STATISTIC_OID_VARIABLE_TYPE_ID    	0x08
+#define     DB_STATISTIC_OID_VARIABLE_SIZE_ID    	0x09
+#define     DB_STATISTIC_DDB_TIME_ID             	0x0A
+#define     DB_STATISTIC_DDB_VALUE_ID            	0x0B
+
+#define     DB_STATISTIC_OID_SIZE            		24
+#define     DB_STATISTIC_RESERVED_SIZE         		2
+#define     DB_STATISTIC_CUR_TIME_SIZE            	4
+#define     DB_STATISTIC_CUR_VALUE_SIZE           	4
+#define     DB_STATISTIC_OLD_TIME_SIZE            	4
+#define     DB_STATISTIC_OLD_VALUE_SIZE           	4
+#define     DB_STATISTIC_OID_TWO_TYPE_SIZE   		1
+#define     DB_STATISTIC_OID_TWO_SIZE_SIZE   		1
+#define     DB_STATISTIC_OID_VARIABLE_TYPE_SIZE 	1
+#define     DB_STATISTIC_OID_VARIABLE_SIZE_SIZE		1
+#define     DB_STATISTIC_DDB_TIME_SIZE           	4
+#define     DB_STATISTIC_DDB_VALUE_SIZE           	4
+
+#define     DB_STATISTIC_VALUE_START_POINT			20
+#define     DB_STATISTIC_VALUE_OID_TWO_POINT   		2
+#define     DB_STATISTIC_VALUE_OID_TWO_SIZE	        4
+#define     DB_STATISTIC_VALUE_OID_VARIABLE_POINT   6
+#define     DB_STATISTIC_VALUE_OID_VARIABLE_SIZE    18
+#define     DB_STATISTIC_VALUE_OID_VARIABLE_TYPE_SIZE 2 //DR610 HJY dbProcessID size
+
+typedef struct _stStatisticTuple {
+	u_char       dbOid[DB_STATISTIC_OID_SIZE];
+	// 	char  Oid_Lvl_ZERO[1];
+	// 	char  Oid_Lvl_ONE[1];
+	// 	char  Oid_Lvl_TWO[4];
+	//	char  Oid_Lvl_VAR[18];
+	//u_char       dbReserved[DB_STATISTIC_RESERVED_SIZE];
+	u_char       dbCurTime[DB_STATISTIC_CUR_TIME_SIZE];
+	u_char       dbCurValue[DB_STATISTIC_CUR_VALUE_SIZE];
+	u_char       dbOldTime[DB_STATISTIC_OLD_TIME_SIZE];
+	u_char       dbOldValue[DB_STATISTIC_OLD_VALUE_SIZE];
+	u_char       dbOidTwoType[DB_STATISTIC_OID_TWO_TYPE_SIZE];
+	u_char       dbOidTwoSize[DB_STATISTIC_OID_TWO_SIZE_SIZE];
+	u_char       dbVariableType[DB_STATISTIC_OID_VARIABLE_TYPE_SIZE];
+	u_char       dbVariableSize[DB_STATISTIC_OID_VARIABLE_SIZE_SIZE];
+	u_char       dbDdbTime[DB_STATISTIC_DDB_TIME_SIZE];
+	u_char       dbDdbValue[DB_STATISTIC_DDB_VALUE_SIZE];
+} stStatisticTuple;
+#define DB_STATISTIC_TUPLE_SUZE sizeof(stStatisticTuple)
+
+//***********************************************************************
+//        SMS Statistics Table Define
+//***********************************************************************
+
+// INTERFACE INFORMATION IN OID ZERO 0BXXxx xxxx
+// Interface is   0B00xx xxxx - internal
+//                0B01xx xxxx - NET
+//                0B10xx xxxx - TCP
+//                0B11xx xxxx - Reserved
+#define MAX_OID_INTFACE_CLASS	3
+#define	OID_ZERO_INF_INTL		0x00
+#define	OID_ZERO_INF_NET		0x40
+#define	OID_ZERO_INF_TCP		0x80
+#define	OID_ZERO_INF_RSV		0xC0
+
+
+// ROLE INFORMATION IN OID ZERO 0B??xx xxxx
+//   Role  is     0Bxx00 xxxx - internal
+//                0Bxx01 xxxx - SM Handling
+//                0Bxx10 xxxx - Management
+//                0Bxx11 xxxx - Reserved
+#define MAX_OID_ROLE_CLASS		3
+#define	OID_ZERO_ROLE_INTL		0x00
+#define	OID_ZERO_ROLE_SM		0x10
+#define	OID_ZERO_ROLE_MGM		0x20
+#define	OID_ZERO_ROLE_DSDS		0x30
+
+// INTERNAL OID is 0B00xx xxxx
+#define MAX_OID_PROCESS_CLASS	5
+#define	OID_ZERO_INTL_ADBMS		OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x00
+#define	OID_ZERO_INTL_SCHD		OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x01
+#define	OID_ZERO_INTL_UHIS		OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x02
+#define	OID_ZERO_INTL_RSCHD		OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x03
+#define OID_ZERO_INTL_RUHIS     OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x04   // added bj bjlee 2007.04.27
+#define	OID_ZERO_INTL_RCSDB		OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x09
+#define	OID_ZERO_INTL_RCSSCHD	OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x0a
+#define OID_ZERO_INTL_RCSUHIS   OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x0b
+#define OID_ZERO_INTL_STAT_ERR   	OID_ZERO_INF_INTL|OID_ZERO_ROLE_INTL|0x0c
+
+#define	OID_ZERO_INTL_SDBMS		OID_ZERO_INF_INTL|OID_ZERO_ROLE_MGM|0x00
+#define	OID_ZERO_INTL_RDBMS		OID_ZERO_INF_INTL|OID_ZERO_ROLE_MGM|0x01
+#define	OID_ZERO_INTL_DDB		OID_ZERO_INF_INTL|OID_ZERO_ROLE_MGM|0x02
+#define	OID_ZERO_INTL_TDBMS		OID_ZERO_INF_INTL|OID_ZERO_ROLE_MGM|0x03
+
+// NET OID is 0B01xx xxxx
+#define	OID_ZERO_NET_TCAP		OID_ZERO_INF_NET|OID_ZERO_ROLE_INTL|0x00
+#define	OID_ZERO_NET_CDMA		OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x00	// 2G or CDMA
+#define	OID_ZERO_NET_GSM		OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x01	// 3G or GSM
+#define	OID_ZERO_NET_GW 		OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x02	// GW(Number Portablility)
+#define	OID_ZERO_NET_RCS		OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x03	// 3G or GSM
+#define	OID_ZERO_NET_MME		OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x04	// MME
+#define	OID_ZERO_NET_UDM		OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x05	// S6c, sh
+#define	OID_ZERO_NET_SMSF		OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x06	// SMSF
+#define	OID_ZERO_NET_SC_P_SGD	OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x07	// SR720 SC Routing
+#define	OID_ZERO_NET_SC_S_SGD	OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x08	// SR720 SC Routing 
+#define	OID_ZERO_NET_CSCF		OID_ZERO_INF_NET|OID_ZERO_ROLE_SM|0x09	// CSCF
+
+#define DIA_SMSC_SEC_BASE_NUM 	100000
+
+#define	OID_ZERO_NET_DSDS_GSM	OID_ZERO_INF_NET|OID_ZERO_ROLE_DSDS|0x00	// DSDS GSM
+#define	OID_ZERO_NET_DSDS_MME	OID_ZERO_INF_NET|OID_ZERO_ROLE_DSDS|0x01	// DSDS MME
+#define	OID_ZERO_NET_DSDS_SMSF	OID_ZERO_INF_NET|OID_ZERO_ROLE_DSDS|0x02	// DSDS SMSF
+
+
+// TCP OID is 0B10xx xxxx
+#define	OID_ZERO_TCP_SMDPS 		OID_ZERO_INF_TCP|OID_ZERO_ROLE_INTL|0x00
+#define	OID_ZERO_TCP_SMPP34		OID_ZERO_INF_TCP|OID_ZERO_ROLE_SM|0x00
+#define	OID_ZERO_TCP_SMCI   	OID_ZERO_INF_TCP|OID_ZERO_ROLE_SM|0x01
+#define	OID_ZERO_TCP_SMPP  		OID_ZERO_INF_TCP|OID_ZERO_ROLE_SM|0x02
+#define	OID_ZERO_TCP_SMDP  		OID_ZERO_INF_TCP|OID_ZERO_ROLE_SM|0x03
+#define	OID_ZERO_TCP_NPQC   	OID_ZERO_INF_TCP|OID_ZERO_ROLE_SM|0x04
+#define	OID_ZERO_TCP_PLUS		OID_ZERO_INF_TCP|OID_ZERO_ROLE_MGM|0x00
+#define	OID_ZERO_TCP_NUMS   	OID_ZERO_INF_TCP|OID_ZERO_ROLE_SM|0x06	// SR810 PKG
+
+
+// Event Direction INFORMATION IN OID ONE 0BXxxx xxxx
+// Direction is   0B0xxx xxxx - Input
+//                0B1xxx xxxx - Output
+#define MAX_OID_DIRECTION_CLASS	3		/* molee add */
+#define	OID_ONE_DIR_IN			0x00
+#define	OID_ONE_DIR_OUT			0x80
+#define	OID_ONE_DIR_OUT_ACK		0x60
+
+// ROLE INFORMATION IN OID ONE 0B??xx xxxx
+// Event Role is 0Bx00x xxxx - internal
+//               0Bx01x xxxx - SM Handling
+//               0Bx10x xxxx - Management
+//               0Bx11x xxxx - Reserved
+#define MAX_OID_JOBS_CLASS		3
+#define	OID_ONE_ROLE_INTL		0x00
+#define	OID_ONE_ROLE_SM			0x20
+#define	OID_ONE_ROLE_MGM		0x40
+#define	OID_ONE_ROLE_RSV		0x60
+
+// Event Type for SM handling or Management is
+//			     0Bxxx0 0xxx - Try
+//               0Bxxx0 1xxx - Result_Sucess
+//               0Bxxx1 0xxx - Result_Failure
+//               0Bxxx1 1xxx - Reserved
+#define MAX_OID_RESULT_CLASS	3
+#define	OID_ONE_TYP_TRY			0x00
+#define	OID_ONE_TYP_SUC			0x08
+#define	OID_ONE_TYP_FAIL		0x10
+#define	OID_ONE_TYP_RSV			0x18
+
+// Event Role is SM handling
+// INPUT Event OID is 0B0xxx xxxx
+#define MAX_OID_EVENT_CLASS		14
+#define OID_ONE_IN_SM \
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x00
+#define OID_ONE_IN_SM_SUCCESS	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x00
+#define OID_ONE_IN_SM_FAILURE	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x00
+
+#define OID_ONE_IN_SMQUERY		\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x01
+#define OID_ONE_IN_SMQUERY_SUCCESS	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x01
+#define OID_ONE_IN_SMQUERY_FAILURE	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x01
+
+#define OID_ONE_IN_VALIDQUERY		\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x02
+#define OID_ONE_IN_VALIDQUERY_SUCCESS	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x02
+#define OID_ONE_IN_VALIDQUERY_FAILURE	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x02
+
+#define OID_ONE_IN_ALERT		\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x03
+#define OID_ONE_IN_ALERT_SUCCESS	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x03
+#define OID_ONE_IN_ALERT_FAILURE	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x03
+
+#define OID_ONE_IN_REPORT		\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x04
+#define OID_ONE_IN_REPORT_SUCCESS	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x04
+#define OID_ONE_IN_REPORT_FAILURE	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x04
+
+#define OID_ONE_IN_INFORM		\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x05
+#define OID_ONE_IN_INFORM_SUCCESS	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x05
+#define OID_ONE_IN_INFORM_FAILURE	\
+			OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x05
+
+#define OID_ONE_IN_PORTED		\
+		OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x06
+#define OID_ONE_IN_PORTED_SUCCESS	\
+		OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x06
+#define OID_ONE_IN_PORTED_FAILURE	\
+		OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x06
+
+#define OID_ONE_IN_EXQUERY		\
+		OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x07
+#define OID_ONE_IN_EXQUERY_SUCCESS	\
+		OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x07
+#define OID_ONE_IN_EXQUERY_FAILURE	\
+		OID_ONE_DIR_IN|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x07
+
+// OUTPUT Event OID is 0B1xxx xxxx
+#define OID_ONE_OUT_SM 		\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x00
+#define OID_ONE_OUT_SM_SUCCESS	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x00
+#define OID_ONE_OUT_SM_FAILURE	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x00
+
+#define OID_ONE_OUT_SMQUERY		\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x01
+#define OID_ONE_OUT_SMQUERY_SUCCESS	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x01
+#define OID_ONE_OUT_SMQUERY_FAILURE	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x01
+
+#define OID_ONE_OUT_VALIDQUERY		\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x02
+#define OID_ONE_OUT_VALIDQUERY_SUCCESS	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x02
+#define OID_ONE_OUT_VALIDQUERY_FAILURE	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x02
+
+#define OID_ONE_OUT_ALERT		\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x03
+#define OID_ONE_OUT_ALERT_SUCCESS	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x03
+#define OID_ONE_OUT_ALERT_FAILURE	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x03
+
+#define OID_ONE_OUT_REPORT		\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x04
+#define OID_ONE_OUT_REPORT_SUCCESS	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x04
+#define OID_ONE_OUT_REPORT_FAILURE	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x04
+
+#define OID_ONE_OUT_INFORM		\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x05
+#define OID_ONE_OUT_INFORM_SUCCESS	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x05
+#define OID_ONE_OUT_INFORM_FAILURE	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x05
+
+#define OID_ONE_OUT_PORTED		\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x06
+#define OID_ONE_OUT_PORTED_SUCCESS	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x06
+#define OID_ONE_OUT_PORTED_FAILURE	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x06
+
+#define OID_ONE_OUT_EXQUERY		\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x07
+#define OID_ONE_OUT_EXQUERY_SUCCESS	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x07
+#define OID_ONE_OUT_EXQUERY_FAILURE	\
+			OID_ONE_DIR_OUT|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x07
+
+// OUT_ACK Event
+#define OID_ONE_OUT_ACK_SM 					\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x00
+#define OID_ONE_OUT_ACK_SM_SUCCESS			\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x00
+#define OID_ONE_OUT_ACK_SM_FAILURE			\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x00
+
+#define OID_ONE_OUT_ACK_SMQUERY				\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x01
+#define OID_ONE_OUT_ACK_SMQUERY_SUCCESS		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x01
+#define OID_ONE_OUT_ACK_SMQUERY_FAILURE		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x01
+
+#define OID_ONE_OUT_ACK_VALIDQUERY			\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x02
+#define OID_ONE_OUT_ACK_VALIDQUERY_SUCCESS	\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x02
+#define OID_ONE_OUT_ACK_VALIDQUERY_FAILURE	\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x02
+
+#define OID_ONE_OUT_ACK_ALERT				\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x03
+#define OID_ONE_OUT_ACK_ALERT_SUCCESS		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x03
+#define OID_ONE_OUT_ACK_ALERT_FAILURE		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x03
+
+#define OID_ONE_OUT_ACK_REPORT				\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x04
+#define OID_ONE_OUT_ACK_REPORT_SUCCESS	    \
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x04
+#define OID_ONE_OUT_ACK_REPORT_FAILURE		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x04
+
+#define OID_ONE_OUT_ACK_INFORM				\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x05
+#define OID_ONE_OUT_ACK_INFORM_SUCCESS		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x05
+#define OID_ONE_OUT_ACK_INFORM_FAILURE		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x05
+
+#define OID_ONE_OUT_ACK_PORTED				\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x06
+#define OID_ONE_OUT_ACK_PORTED_SUCCESS		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x06
+#define OID_ONE_OUT_ACK_PORTED_FAILURE		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x06
+
+#define OID_ONE_OUT_ACK_EXQUERY				\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_TRY|0x07
+#define OID_ONE_OUT_ACK_EXQUERY_SUCCESS		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_SUC|0x07
+#define OID_ONE_OUT_ACK_EXQUERY_FAILURE		\
+		OID_ONE_DIR_OUT_ACK|OID_ONE_ROLE_SM|OID_ONE_TYP_FAIL|0x07
+
+// Event Role is internal
+// Event Type is not used for Internal
+// INPUT Event OID is 0B0xxx xxxx
+#define	OID_ONE_IN_SCHD_RETRY_SLEEP 	OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x00
+#define	OID_ONE_IN_DATA_LENGTH 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x01
+#define	OID_ONE_IN_TIME_INTERVAL 		OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x02
+#define	OID_ONE_IN_ERROR_CODE 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x03
+#define	OID_ONE_IN_TC_INVOKE 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x04
+#define	OID_ONE_IN_TC_RESULT 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x05
+#define	OID_ONE_IN_TC_CANCEL			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x06
+#define	OID_ONE_IN_TC_ERROR 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x07
+#define	OID_ONE_IN_TC_REJECT			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x08
+#define	OID_ONE_IN_TC_BEGIN 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x09
+#define	OID_ONE_IN_TC_CONTINUE 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x0a
+#define	OID_ONE_IN_TC_END 				OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x0b
+#define	OID_ONE_IN_TC_UNIDIR 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x0c
+#define	OID_ONE_IN_TC_PABORT 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x0d
+#define	OID_ONE_IN_TC_UABORT 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x0e
+#define	OID_ONE_IN_TC_NOTICE 			OID_ONE_DIR_IN|OID_ONE_ROLE_INTL|0x0f
+
+// OUTPUT Event OID is 0B1xxx xxxx
+#define	OID_ONE_OUT_SCHD_RETRY_SLEEP 	OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x00
+#define	OID_ONE_OUT_DATA_LENGTH 		OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x01
+#define	OID_ONE_OUT_TIME_INTERVAL 		OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x02
+#define	OID_ONE_OUT_ERROR_CODE 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x03
+#define	OID_ONE_OUT_TC_INVOKE 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x04
+#define	OID_ONE_OUT_TC_RESULT 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x05
+#define	OID_ONE_OUT_TC_CANCEL			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x06
+#define	OID_ONE_OUT_TC_ERROR 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x07
+#define	OID_ONE_OUT_TC_REJECT			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x08
+#define	OID_ONE_OUT_TC_BEGIN 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x09
+#define	OID_ONE_OUT_TC_CONTINUE 		OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x0a
+#define	OID_ONE_OUT_TC_END 				OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x0b
+#define	OID_ONE_OUT_TC_UNIDIR 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x0c
+#define	OID_ONE_OUT_TC_PABORT 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x0d
+#define	OID_ONE_OUT_TC_UABORT 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x0e
+#define	OID_ONE_OUT_TC_NOTICE 			OID_ONE_DIR_OUT|OID_ONE_ROLE_INTL|0x0f
+
+// OID TWO Value Class is below
+// OID TWO is   0X0000xxxx - Time
+//              0Xxxxxxxxx - Error Code
+#define	MAX_OID_TWO_TYPE_CLASS		5
+#define	OID_TWO_TYP_NONE			0x00
+#define	OID_TWO_TYP_TIME			0x01
+#define	OID_TWO_TYP_ERRC			0x02
+#define	OID_TWO_TYP_DLEN			0x03
+// Data Length is add to value field
+
+/* oid variable type*/
+#define	MAX_OID_VARTYPE_CLASS		6 /* molee 5-> 6 */
+#define	MAX_OID_VAR_PROCESS_ID		0xFF
+
+#define	OID_VAR_TYP_NONE			0x00
+#define	OID_VAR_TYP_SMEID			0x01 /*Process ID */
+#define	OID_VAR_TYP_GRPID			0x02 /*DPC type */
+#define	OID_VAR_TYP_TSVID			0x03 /*Teleservice ID */
+//#define	OID_VAR_TYP_PTCID			0x04 /*Protocol ID */
+#define	OID_VAR_TYP_SME				0x04 /*ESME Source Address type */
+
+
+#define OID_SET_TWO_VALUE(c, a, b)  \
+	{								\
+		memset(&c[DB_STATISTIC_VALUE_OID_TWO_POINT], 0xFF, DB_STATISTIC_VALUE_OID_TWO_SIZE); \
+		memcpy(&c[DB_STATISTIC_VALUE_OID_TWO_POINT], &a, b); \
+	}
+#define OID_SET_VAR_VALUE(c, a, b)  \
+	{								\
+		memset(&c[DB_STATISTIC_VALUE_OID_VARIABLE_POINT], 0xFF, DB_STATISTIC_VALUE_OID_VARIABLE_SIZE); \
+		memcpy(&c[DB_STATISTIC_VALUE_OID_VARIABLE_POINT], a, b); \
+	}
+
+//***********************************************************************
+//        SMS Statistics Enviorment Macro
+//***********************************************************************
+#define	STATISITCS_MAX_MSGQ_RETRY	10
+#define	STATISITCS_MAX_SEM_RETRY	5
+
+//***********************************************************************
+//        SMS Statistics Record Macro
+//***********************************************************************
+
+#define	SET_STSTABLE_GROUPID(spStsTable, cpGroupID) \
+	{												\
+		int	nLoop = 0, nCnt;						\
+		nCnt = (strlen(cpGroupID) < sizeof(spStsTable->GroupID))? 						\
+				strlen(cpGroupID) : sizeof(spStsTable->GroupID);						\
+		while (nLoop < nCnt && ((cpGroupID[nLoop] >= '0') && (cpGroupID[nLoop] <= '9')))\
+		{																				\
+			spStsTable->GroupID[nLoop/2] &= 											\
+				((nLoop%2)? ((cpGroupID[nLoop] - '0') | 0xf0) 							\
+					: (((cpGroupID[nLoop] - '0')<<4) | 0x0f));							\
+		}																				\
+	}
+
+
+#endif	// _STATISTICS_TABLE_H_
+

@@ -1,0 +1,79 @@
+[17:08:13.206442] [5948/0] [INFO ] Added logfile `./push_client.log' with level `0'.
+[17:08:13.206826] [5948/0] [INFO ] [PushSend] http://112.172.129.68:8405 Send(id:0) : papType=00&senderId=SYSTEM&osTp=1&appId=0123456789&regId=DeviceToken&content=good+morning&data=i'm+data
+[17:08:13.207097] [5948/0] [DEBUG] gwlib.gwthread(0): Started thread 1 (fdset.c:poller)
+[17:08:13.207141] [5948/1] [DEBUG] gwlib.gwthread(0): Thread 1 (fdset.c:poller) maps to pid 5948.
+[17:08:13.207367] [5948/0] [DEBUG] gwlib.gwthread(0): Started thread 2 (http.c:write_request_thread)
+[17:08:13.207443] [5948/2] [DEBUG] gwlib.gwthread(0): Thread 2 (http.c:write_request_thread) maps to pid 5948.
+[17:08:13.208010] [5948/2] [DEBUG] gwlib.http(0): Queue contains 0 pending requests.
+[17:08:13.208472] [5948/2] [DEBUG] gwlib.http(0): HTTP: Opening connection to `112.172.129.68:8405' (fd=9).
+[17:08:13.208558] [5948/2] [DEBUG] gwlib.http(0): Socket connecting
+[17:08:13.210875] [5948/1] [DEBUG] gwlib.http(0): Get info about connecting socket
+[17:08:13.211276] [5948/1] [DEBUG] gwlib.http(0): HTTP: Sending request:
+[17:08:13.211398] [5948/1] [DEBUG] gwlib.octstr(0): Octet string at 0x7f98e80008f0:
+[17:08:13.211494] [5948/1] [DEBUG] gwlib.octstr(0):   len:  189
+[17:08:13.211575] [5948/1] [DEBUG] gwlib.octstr(0):   size: 1024
+[17:08:13.211653] [5948/1] [DEBUG] gwlib.octstr(0):   immutable: 0
+[17:08:13.211749] [5948/1] [DEBUG] gwlib.octstr(0):   data: 50 4f 53 54 20 2f 20 48 54 54 50 2f 31 2e 31 0d   POST / HTTP/1.1.
+[17:08:13.211839] [5948/1] [DEBUG] gwlib.octstr(0):   data: 0a 48 6f 73 74 3a 20 31 31 32 2e 31 37 32 2e 31   .Host: 112.172.1
+[17:08:13.211926] [5948/1] [DEBUG] gwlib.octstr(0):   data: 32 39 2e 36 38 3a 38 34 30 35 0d 0a 43 6f 6e 6e   29.68:8405..Conn
+[17:08:13.212012] [5948/1] [DEBUG] gwlib.octstr(0):   data: 65 63 74 69 6f 6e 3a 20 43 6c 6f 73 65 0d 0a 43   ection: Close..C
+[17:08:13.212100] [5948/1] [DEBUG] gwlib.octstr(0):   data: 6f 6e 74 65 6e 74 2d 4c 65 6e 67 74 68 3a 20 31   ontent-Length: 1
+[17:08:13.212196] [5948/1] [DEBUG] gwlib.octstr(0):   data: 30 33 0d 0a 0d 0a 70 61 70 54 79 70 65 3d 30 30   03....papType=00
+[17:08:13.212284] [5948/1] [DEBUG] gwlib.octstr(0):   data: 26 73 65 6e 64 65 72 49 64 3d 53 59 53 54 45 4d   &senderId=SYSTEM
+[17:08:13.212385] [5948/1] [DEBUG] gwlib.octstr(0):   data: 26 6f 73 54 70 3d 31 26 61 70 70 49 64 3d 30 31   &osTp=1&appId=01
+[17:08:13.212472] [5948/1] [DEBUG] gwlib.octstr(0):   data: 32 33 34 35 36 37 38 39 26 72 65 67 49 64 3d 44   23456789&regId=D
+[17:08:13.212560] [5948/1] [DEBUG] gwlib.octstr(0):   data: 65 76 69 63 65 54 6f 6b 65 6e 26 63 6f 6e 74 65   eviceToken&conte
+[17:08:13.212646] [5948/1] [DEBUG] gwlib.octstr(0):   data: 6e 74 3d 67 6f 6f 64 2b 6d 6f 72 6e 69 6e 67 26   nt=good+morning&
+[17:08:13.212732] [5948/1] [DEBUG] gwlib.octstr(0):   data: 64 61 74 61 3d 69 27 6d 2b 64 61 74 61            data=i'm+data
+[17:08:13.212810] [5948/1] [DEBUG] gwlib.octstr(0): Octet string dump ends.
+[17:08:13.231020] [5948/1] [DEBUG] gwlib.http(0): HTTP: Status line: <HTTP/1.1 200 OK>
+[17:08:13.231175] [5948/1] [DEBUG] gwlib.http(0): HTTP: Received response:
+[17:08:13.231275] [5948/1] [DEBUG] gwlib.octstr(0): Octet string at 0x7f98e8001770:
+[17:08:13.231389] [5948/1] [DEBUG] gwlib.octstr(0):   len:  88
+[17:08:13.231467] [5948/1] [DEBUG] gwlib.octstr(0):   size: 1024
+[17:08:13.231546] [5948/1] [DEBUG] gwlib.octstr(0):   immutable: 0
+[17:08:13.231633] [5948/1] [DEBUG] gwlib.octstr(0):   data: 44 61 74 65 3a 20 53 75 6e 20 41 70 72 20 31 39   Date: Sun Apr 19
+[17:08:13.231721] [5948/1] [DEBUG] gwlib.octstr(0):   data: 20 31 36 3a 35 34 3a 34 37 20 4b 53 54 20 32 30    16:54:47 KST 20
+[17:08:13.231808] [5948/1] [DEBUG] gwlib.octstr(0):   data: 31 35 0d 0a 0d 0a 63 6f 64 65 3d 31 30 30 30 26   15....code=1000&
+[17:08:13.231893] [5948/1] [DEBUG] gwlib.octstr(0):   data: 64 65 73 63 3d 53 75 63 63 65 73 73 26 70 75 73   desc=Success&pus
+[17:08:13.231980] [5948/1] [DEBUG] gwlib.octstr(0):   data: 68 49 64 3d 32 30 31 35 30 34 31 39 31 36 35 34   hId=201504191654
+[17:08:13.232062] [5948/1] [DEBUG] gwlib.octstr(0):   data: 34 37 30 30 31 30 32 31                           47001021
+[17:08:13.232194] [5948/1] [DEBUG] gwlib.octstr(0): Octet string dump ends.
+[17:08:13.232404] [5948/0] [INFO ] [PushRecv] http://112.172.129.68:8405 (id:0) HttpStatus(200): code=1000&desc=Success&pushId=20150419165447001021
+[17:08:13.232578] [5948/0] [INFO ] result Code[1000] Desc[Success] pushId[20150419165447001021]
+[17:08:13.232713] [5948/0] [INFO ] [PushSend] http://112.172.129.68:8405 Send(id:1) : papType=01&pushId=20150419165447001021
+[17:08:13.232833] [5948/2] [DEBUG] gwlib.http(0): Queue contains 0 pending requests.
+[17:08:13.233015] [5948/2] [DEBUG] gwlib.http(0): HTTP: Opening connection to `112.172.129.68:8405' (fd=9).
+[17:08:13.233093] [5948/2] [DEBUG] gwlib.http(0): Socket connecting
+[17:08:13.233336] [5948/1] [DEBUG] gwlib.http(0): Get info about connecting socket
+[17:08:13.233499] [5948/1] [DEBUG] gwlib.http(0): HTTP: Sending request:
+[17:08:13.233713] [5948/1] [DEBUG] gwlib.octstr(0): Octet string at 0x7f98e8001620:
+[17:08:13.233793] [5948/1] [DEBUG] gwlib.octstr(0):   len:  123
+[17:08:13.233871] [5948/1] [DEBUG] gwlib.octstr(0):   size: 1024
+[17:08:13.233948] [5948/1] [DEBUG] gwlib.octstr(0):   immutable: 0
+[17:08:13.234065] [5948/1] [DEBUG] gwlib.octstr(0):   data: 50 4f 53 54 20 2f 20 48 54 54 50 2f 31 2e 31 0d   POST / HTTP/1.1.
+[17:08:13.234155] [5948/1] [DEBUG] gwlib.octstr(0):   data: 0a 48 6f 73 74 3a 20 31 31 32 2e 31 37 32 2e 31   .Host: 112.172.1
+[17:08:13.234250] [5948/1] [DEBUG] gwlib.octstr(0):   data: 32 39 2e 36 38 3a 38 34 30 35 0d 0a 43 6f 6e 6e   29.68:8405..Conn
+[17:08:13.234351] [5948/1] [DEBUG] gwlib.octstr(0):   data: 65 63 74 69 6f 6e 3a 20 43 6c 6f 73 65 0d 0a 43   ection: Close..C
+[17:08:13.234440] [5948/1] [DEBUG] gwlib.octstr(0):   data: 6f 6e 74 65 6e 74 2d 4c 65 6e 67 74 68 3a 20 33   ontent-Length: 3
+[17:08:13.234528] [5948/1] [DEBUG] gwlib.octstr(0):   data: 38 0d 0a 0d 0a 70 61 70 54 79 70 65 3d 30 31 26   8....papType=01&
+[17:08:13.234615] [5948/1] [DEBUG] gwlib.octstr(0):   data: 70 75 73 68 49 64 3d 32 30 31 35 30 34 31 39 31   pushId=201504191
+[17:08:13.234699] [5948/1] [DEBUG] gwlib.octstr(0):   data: 36 35 34 34 37 30 30 31 30 32 31                  65447001021
+[17:08:13.234775] [5948/1] [DEBUG] gwlib.octstr(0): Octet string dump ends.
+[17:08:13.238534] [5948/1] [DEBUG] gwlib.http(0): HTTP: Status line: <HTTP/1.1 200 OK>
+[17:08:13.238673] [5948/1] [DEBUG] gwlib.http(0): HTTP: Received response:
+[17:08:13.238759] [5948/1] [DEBUG] gwlib.octstr(0): Octet string at 0x7f98e8001770:
+[17:08:13.238837] [5948/1] [DEBUG] gwlib.octstr(0):   len:  57
+[17:08:13.238914] [5948/1] [DEBUG] gwlib.octstr(0):   size: 1024
+[17:08:13.238991] [5948/1] [DEBUG] gwlib.octstr(0):   immutable: 0
+[17:08:13.239081] [5948/1] [DEBUG] gwlib.octstr(0):   data: 44 61 74 65 3a 20 53 75 6e 20 41 70 72 20 31 39   Date: Sun Apr 19
+[17:08:13.239168] [5948/1] [DEBUG] gwlib.octstr(0):   data: 20 31 36 3a 35 34 3a 34 37 20 4b 53 54 20 32 30    16:54:47 KST 20
+[17:08:13.239256] [5948/1] [DEBUG] gwlib.octstr(0):   data: 31 35 0d 0a 0d 0a 63 6f 64 65 3d 6e 75 6c 6c 26   15....code=null&
+[17:08:13.239383] [5948/1] [DEBUG] gwlib.octstr(0):   data: 64 65 73 63 3d 6e 75 6c 6c                        desc=null
+[17:08:13.239461] [5948/1] [DEBUG] gwlib.octstr(0): Octet string dump ends.
+[17:08:13.239601] [5948/0] [INFO ] [PushRecv] http://112.172.129.68:8405 (id:1) HttpStatus(200): code=null&desc=null
+[17:08:13.239739] [5948/0] [INFO ] cancel result Code[null] Desc[null]
+[17:08:13.239855] [5948/0] [DEBUG] gwlib.gwthread(0): Waiting for 2 (http.c:write_request_thread) to terminate
+[17:08:13.239953] [5948/2] [DEBUG] gwlib.gwthread(0): Thread 2 (http.c:write_request_thread) terminates.
+[17:08:13.240227] [5948/1] [DEBUG] gwlib.gwthread(0): Thread 1 (fdset.c:poller) terminates.
+[17:08:13.240621] [5948/0] [DEBUG] gwlib.octstr(0): Immutable octet strings: 5.

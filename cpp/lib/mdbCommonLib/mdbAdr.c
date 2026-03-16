@@ -1,0 +1,130 @@
+#include <errno.h>
+#include <fcntl.h>
+#include <spdlog/spdlog.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
+
+#include "Debug.h"
+#include "FLKBaseDef.h"
+#include "MdbCommon.h"
+
+#define DBMS_ADDR_ST_SIZE sizeof(DBMS_ADDR_ST) * MAX_DBMS_CNT
+#define MDB_ADDR_CONV "MDB_ADDR_FILE"
+
+static int create_mdb_adr_file() {
+  int fd;
+  char *dbms_adr;
+
+  const char *env = getenv(SYSTEM_CONFIG_HOME);
+  if (!env) {
+    spdlog::error("[{}:{}]config home read failed [{}]", __func__, __LINE__,
+                  SYSTEM_CONFIG_HOME);
+    return FLK_FAIL;
+  }
+
+  const std::string mdb_adr_file = "mdb.adr";
+
+  fd = open(mdb_adr_file.c_str(), O_CREAT | O_RDWR, 0666);
+  if (fd < 0) {
+    spdlog::error("{} open {} failed", __func__, mdb_adr_file.c_str());
+    return FLK_FAIL;
+  }
+
+  lockf(fd, F_LOCK, 0);
+
+  dbms_adr = (char *)malloc(DBMS_ADDR_ST_SIZE);
+  memset(dbms_adr, 0x00, DBMS_ADDR_ST_SIZE);
+
+  write(fd, dbms_adr, DBMS_ADDR_ST_SIZE);
+
+  lockf(fd, F_ULOCK, 0);
+
+  close(fd);
+  return FLK_SUCCESS;
+}
+
+static int open_mdb_adr_file() {
+  int fd;
+
+  const char *env = getenv(SYSTEM_CONFIG_HOME);
+  if (!env) {
+    spdlog::error("[{}:{}]config home read failed [{}]", __func__, __LINE__,
+                  SYSTEM_CONFIG_HOME);
+    return FLK_FAIL;
+  }
+
+  const std::string mdb_adr_file = "mdb.adr";
+
+  if (access(mdb_adr_file.c_str(), F_OK) != 0) {
+    create_mdb_adr_file();
+  }
+
+  fd = open(mdb_adr_file.c_str(), O_RDWR);
+  if (fd < 0) {
+    spdlog::error("open_mdb_adr_file {} open failed", mdb_adr_file.c_str());
+    return FLK_FAIL;
+  }
+
+  if (lockf(fd, F_LOCK, 0) != 0) {
+    perror("lockd failed");
+    close(fd);
+    return FLK_FAIL;
+  }
+
+  return fd;
+}
+
+static void close_mdb_adr_file(int fd) {
+  lockf(fd, F_ULOCK, 0);
+  close(fd);
+}
+
+int read_dbms_addr(int dbms_idx, DBMS_ADDR_ST *addr) {
+  int fd = -1;
+  int ret = FLK_FAIL;
+
+  DBMS_ADDR_ST dbms_adr[MAX_DBMS_CNT];
+
+  fd = open_mdb_adr_file();
+  if (fd == FLK_FAIL) {
+    spdlog::error("open_mdb_adr_file failed");
+    return FLK_FAIL;
+  }
+
+  if (read(fd, dbms_adr, DBMS_ADDR_ST_SIZE) == DBMS_ADDR_ST_SIZE) {
+    memcpy(addr, &dbms_adr[dbms_idx], sizeof(DBMS_ADDR_ST));
+    ret = FLK_SUCCESS;
+  }
+
+  close_mdb_adr_file(fd);
+
+  return ret;
+}
+
+int set_mdb_shm_addr(int dbms_idx, char *dbms_adr, char *index_adr,
+                     char *dirty_adr) {
+  int fd = -1;
+
+  DBMS_ADDR_ST adr;
+
+  adr.dbms_adr = (long)dbms_adr;
+  adr.index_adr = (long)index_adr;
+  adr.dirty_adr = (long)dirty_adr;
+
+  fd = open_mdb_adr_file();
+  if (fd == FLK_FAIL) {
+    spdlog::error("open_mdb_adr_file failed");
+    return FLK_FAIL;
+  }
+
+  lseek(fd, dbms_idx * sizeof(DBMS_ADDR_ST), SEEK_SET);
+
+  write(fd, &adr, sizeof(DBMS_ADDR_ST));
+
+  close_mdb_adr_file(fd);
+  return FLK_SUCCESS;
+}

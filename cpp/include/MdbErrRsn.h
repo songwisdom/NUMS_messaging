@@ -1,0 +1,811 @@
+/*******************************************************************************
+*
+*     Copyright (c) 2001 FEELINGK Co., Ltd.
+*     All rights reserved.
+*
+*     This program contains confidential and proprietary information of
+*     FEELINGK, and any reproduction, disclosure, or use in whole or in part
+*     by prior written agreement or permission of FEELINGK.
+*
+*                            FEELINGK Co., Ltd.
+*         5F Roy B/D 90-6 Nonhyun-dong Kangnam-Gu, Seoul, 135-010 Korea
+*
+#******************************************************************************/
+
+/*******************************************************************************
+    FILE NAME       :   MdbErrRsn.h
+    PURPOSE         :
+    DATE OF WRITE   :   2001.12.01
+    AUTHOR          :
+    REVISION        :   V 1.0
+    Ver.    By      When        Reason
+    ------- ------- ----------  -----------------------------------------
+    1.0     		2001.12.01  first coding
+*******************************************************************************/
+
+#ifndef _MDBERRRSN_H_
+#define _MDBERRRSN_H_
+
+/*********************************************************
+          ERR CODE Format : 0xXXXX
+
+        1)  0xaXXX          : Local Error
+		2)	0xfXXX			: Tcap Error
+		3) 	CDMA
+				0x1XXX		: Map User Error
+				0x2XXX		: Cause Code
+				0x3XXX		: Access Denied Reason
+		4)	UMTS
+				0x6XXX		: Map User Error
+				0x7XXX		: HLR return error(MNRF)
+				0x8XXX		: TP-FCS (TP- Failure-Cause)
+
+		Notice) The last one byte is the real error code at 3), 4).
+
+		Ver : 1.0 (First Coding)
+**********************************************************/
+
+
+#define DONT_MARK_ERR					0x00
+
+/*
+ * VMS MSG FAIL
+ */
+typedef enum { NO_VMS_MSG_COUNT 	= 0xa0b0 } eVmnFails;
+
+/*
+ * Spam SM
+ */
+typedef enum { ERR_700_SM			= 0xa303 } eSpamFails;
+
+/*
+ * Can't Check ESME
+ */
+typedef enum { ESME_CHK_IMPOSSABLE	= 0xa0a0 } eCantEsme; /*Retry */
+
+/*
+ * SS7 LINK PROBLEM
+ */
+typedef enum {
+	SS7_LINK_PROBLEM		= 0xa090,
+	OVERLOAD_CONTROL
+} eSs7LinkPrb;/*Retry */
+
+/*
+ * EMPTY BEARERDATA REASON
+ */
+typedef enum { NO_BEARERDATA_ERR	= 0xa080 } eEmptyBear;/*Test for SMSREQ*/
+
+/*
+ * NOTI SEND REASON
+ */
+typedef enum { NOTI_SEND_IMMEDIATLY	= 0xa070 } eNotiSendRsn;/*Retry 41072 (27)*/
+
+/*
+ * SCHD ERROR REASON      hkkang 1998.07.27
+ */
+/*
+typedef enum {
+	ERR_RETRY_ALGO_FINISH			= 0xa060,
+	ERR_OVERFLOW					= 0xa062,
+	ERR_INTERNAL					= 0xa061,
+} eSchdErrRsn;
+*/
+typedef enum {
+	ERR_RETRY_ALGO_FINISH	= 0xa060,
+	ERR_ASES_OVERFLOW,		//0xa061,
+	ERR_ESME_OVERFLOW,		//0xa062,
+	ERR_NPQC_OVERFLOW,		//0xa063,
+	ERR_DUAL_OVERFLOW,		//0xa064,
+	ERR_BMCH_OVERFLOW,		//0xa065,
+	ERR_TOC_OVERFLOW,       //0xa066
+	ERR_TOC_WAITTING_QUEUE_OVERFLOW,       //0xa067 FR120 TOC waitting Queue overflow
+	ERR_ASES_INTERNAL		= 0xa068,
+	ERR_ESME_INTERNAL,		//0xa069,
+	ERR_NPQC_INTERNAL,		//0xa06a,
+	ERR_DUAL_INTERNAL,		//0xa06b,
+	ERR_BMCH_INTERNAL,		//0xa06c
+	ERR_PREPROCESSING_QUEUE_FULL, 	//0xa06d
+	ERR_RETRY_WAIT_FAIL, 	// 0xa06e 
+	ERR_ESME_MMCS_INTERNAL,  // 0xa06f
+	ERR_POOL_CSCF_ALL_DISCON = 0xA0C0,
+	ERR_POOL_S6C_ALL_DISCON, 	// 0xA0C1
+} eSchdErrRsn;
+
+typedef enum {
+	POOL_ROUTING_UDM_PRIFIX_ERROR = 0xa1b0, 	// 41392
+	POOL_ROUTING_UDM_GROUP_DOWN_ERROR, 			// 41393 
+	POOL_ROUTING_CSCF_GROUP_DOWN_ERROR,			// 41394
+	IPSMGW_ACCEPT_PREFIX_ERROR, 				// 41395
+	POOL_ROUTING_ASE_TO_POOL_ERROR, 			// 41396 sip mt(ICSCF) + 41407 + 41409 
+	POOL_ROUTING_SGD_TO_POOL_ERROR, 			// 41397
+	POOL_ROUTING_ISC_TO_POOL_ERROR, 			// 41398 sip regi
+	POOL_ROUTING_POOL_TO_S6C_ERROR, 			// 41399
+	POOL_ROUTING_POOL_TO_SH_ERROR, 				// 41400
+	SIP_PROXY_TO_STACK_ERROR, 					// 41401
+	SIP_STACK_TO_ISC_ERROR, 					// 41402
+	SIP_STACK_TO_OPT_ERROR, 					// 41403
+	SIP_STACK_TO_PROXY_ERROR, 					// 41404
+	SIP_ISC_TO_STACK_ERROR, 					// 41405
+	SIP_OPT_TO_STACK_ERROR, 					// 41406
+	SCHD_TO_ISC_ERROR, 							// 41407 sip mt (ICSCF, SCSCF)
+	POOL_ROUTING_POOL_TO_ISC_ERROR, 			// 41408
+	UDM_TO_ISC_ERROR, 							// 41409 sip mt (SCSCF)
+	SIP_MSG_TO_POOL, 							// 41410 sip mo 
+	SIP_REGI_OVERLOAD_CTRL, 					// 41411
+	SIP_MSG_OVERLOAD_CTRL, 						// 41412 
+	SIP_BODY_LEN_FAIL, 							// 41413
+	SIP_METHOD_FAIL 							// 41414
+} fInternalErrorCode;
+
+/*
+ * TIME_EXPIRATION_ERROR_REASON
+ */
+typedef enum {
+	ERR_TIME_EXPIRATION				= 0xa201,
+	ERR_TRANS_TIME_EXPIRATION		= 0xa202,
+	ERR_SUBMIT_SM_TIME_EXPIRATION	= 0xa203
+} eTimeExpired;
+
+/*
+ * DELETE_ERROR_REASON
+ */
+typedef enum {
+	ERR_USER_DELETE		         	= 0xa301,
+	ERR_ESME_CANCEL					= 0xa302,
+	ERR_ADMINBAR_DELETE 			= 0xa304,
+	ERR_SMS_SUCC_DEL 				= 0xa305
+} eDeleteRsn;
+
+/*
+ * MEMORY DB QUERY ERROR.
+ */
+typedef enum {
+	ERR_MSGQ_ERROR					= 0xa001,
+	ERR_PREFIX_ERROR				= 0xa002,
+	ERR_INT_PROCESS					= 0xa003,
+	ERR_PARAM_ERROR					= 0xa011,
+	ERR_INIT_PARAM_ERROR		    = 0xa012,
+	ERR_TCSEND_ERROR				= 0xa021,
+	ERR_MEMDB_ERROR					= 0xa022,
+	ERR_RNPREFIX_ERROR				= 0xa023,
+	ERR_NPQCID_SEARCH_ERROR			= 0xa024,
+	ERR_SMCPREFIX_ERROR				= 0xa025,
+	ERR_ISDN_ERROR					= 0xa026
+} eMdbTableRsn;
+
+/*
+ * ESME SEND ERROR REASON
+ */
+typedef enum { ESME_SEND_ERROR		= 0xa050 } eEsmeSendRsn;
+
+/*
+ * SMS_CAUSE_CODE_REASON (for CDMA)
+ */
+/* Network Problems */
+typedef enum {
+	ERR_N_ADDR_VAC					= 0x2000, /* Address vacant */
+	ERR_N_ADDR_TRAN_FAIL			= 0x2001, /* Address Translation failure */
+	ERR_N_NET_RESRC_SHORT			= 0x2002, /* Network Resourse Shortage */
+	ERR_N_NET_FAIL					= 0x2003, /* Network failure */
+	ERR_N_INV_TELSVC_ID				= 0x2004, /* Invalid Teleservice ID */
+	ERR_N_OTHER_NET_PROB			= 0x2005, /* Other Network Problem */
+	ERR_N_TO_HLR_OVERLOAD_CONTROL	= 0x2006, /* Msg Tx,Rx Control Block */
+	ERR_N_FROM_MSC_OVERLOAD_CONTROL	= 0x2007, /* Msg Tx,Rx Control Block */
+	ERR_N_TO_MSC_OVERLOAD_CONTROL	= 0x2008  /* Msg Tx,Rx Control Block */
+} eNewworkPrablems;
+
+/* Terminal Problems */
+typedef enum {
+	ERR_T_NO_PAGE_RESP				= 0x2020, /* No page response */
+	ERR_T_DEST_BUSY					= 0x2021, /* Destination busy */
+	ERR_T_NO_ACK					= 0x2022, /* No Acknowledgment */
+	ERR_T_DEST_RESRC_SHORT		    = 0x2023, /* Destination resource shortage */
+	ERR_T_SMS_DELI_POSTPON		    = 0x2024, /* SMS Delivery postponed */
+	ERR_T_DEST_OUT_OF_SVC			= 0x2025, /* Destination out of service */
+	ERR_T_DEST_NO_LONGER			= 0x2026, /* Destination no Longer at this address */
+	ERR_T_OTHER_TERM_PROB			= 0x2027  /* Other terminal problem */
+} eTerminalProblems;
+
+/* Radio Interface Problems */
+typedef enum {
+	ERR_R_RADIO_INT_RESRC_SHORT		= 0x2040, /* Radio interface resourc shortage */
+	ERR_R_RADIO_INT_INCOMP			= 0x2041, /* Radio interface incompatibility */
+	ERR_R_OTHER_RADIO_INT_PROB		= 0x2042  /* Other radio interface problem */
+} eRadioInterfaceProblems;
+
+/* General Problems */
+typedef enum {
+	ERR_G_ENCODE_PROB				= 0x2060, /* Encoding problem */
+	ERR_G_SMS_ORIG_DENIED			= 0x2061, /* SMS origination denied */
+	ERR_G_SMS_TERM_DENIED			= 0x2062, /* SMS termination denied */
+	ERR_G_SUPP_SVC_NOT_SUPPORT		= 0x2063, /* Supplementary service not supported */
+	ERR_G_SMS_NOT_SUPPORT			= 0x2064, /* SMS not suppored */
+	ERR_G_MISS_EXPECT_PARAM			= 0x2066, /* Missing expected parameter */
+	ERR_G_MISS_MAN_PARAM			= 0x2067, /* Missing mandatory parameter */
+	ERR_G_UNRECOGNIZED_PARAM		= 0x2068, /* Unrecognized parameter value */
+	ERR_G_UNEXPECTED_PARAM			= 0x2069, /* Unexpected parameter value */
+	ERR_G_USER_DATA_SIZE_ERR		= 0x206a, /* User data size error */
+	ERR_G_OTHER_GEN_PROB			= 0x206b, /* Other general problems */
+	ERR_G_DUPLICATE_TERM			= 0x202f  /* Duplicate Terminal */
+	                                  /* Add to Illegal Terminal from VLR 2004.01.09 */
+} eGeneralProblems;
+
+/*
+ * ACCESS_DENIED_REASON (for CDMA)
+ */
+typedef enum {
+	ERR_SMS_DENIED              	= 0x3001, /* Denied */
+	ERR_SMS_POSTPONED           	= 0x3002, /* Postponed */
+	ERR_SMS_UNAVAILABLE         	= 0x3003, /* Unavailable */
+	ERR_SMS_PORTED					= 0x3040  /* Ported Min */
+} eAccessDeniedRsn;
+
+/*
+ * TCAP_ERROR REASON
+ */
+typedef enum {
+	ERR_TC_L_CANCEL					= 0xf001,
+	ERR_TC_U_ERROR					= 0xf002,
+	ERR_TC_U_ABORT					= 0xf003,
+	ERR_TC_P_ABORT					= 0xf004,
+	ERR_TC_NOTICE_IND				= 0xf005,
+	ERR_TC_STATE_IND				= 0xf006,
+	ERR_TC_PCSTATE_IND				= 0xf007,
+	ERR_TC_L_REJECT_IND				= 0xf008,
+	ERR_TC_R_REJECT_IND				= 0xf009,
+	ERR_TC_U_REJECT_IND				= 0xf00a,
+	ERR_TC_INVALID_MULTI_PC 		= 0xf00b  /*Notify SC Routing in Multi OPC for SKT */
+} eTcapErrRsn;
+
+/*
+ * TCAP User Error(MAP VIEW) Reason (for CDMA)
+ */
+typedef enum {
+	ERR_TC_U_UNRECMIN        		= 0x1081, /* Unrecognized MIN */
+	ERR_TC_U_UNRECESN        		= 0x1082, /* Unrecognized ESN */
+	ERR_TC_U_MINHLRMIS       		= 0x1083, /* MIN/HLR Mismatch */
+	ERR_TC_U_OPSEQPROB       		= 0x1084, /* Operation SequenceProblem */
+	ERR_TC_U_RESOURCESHOR    		= 0x1085, /* Resource Shortage */
+	ERR_TC_U_OPNOTSUP        		= 0x1086, /* Operation Not Supported */
+	ERR_TC_U_TRUNKUNAB       		= 0x1087, /* Trunk Unavailable */
+	ERR_TC_U_PARAMERR        		= 0x1088, /* Parameter Error */
+	ERR_TC_U_SYSFAIL         		= 0x1089, /* System Failure */
+	ERR_TC_U_UNRECPARM       		= 0x108a, /* Unrecognized Parameter Value */
+	ERR_TC_U_FEATUREINAC     		= 0x108b, /* Feature Inactive */
+	ERR_TC_U_MISPARAM        		= 0x108c  /* Missing Parameter */
+} eTcapUserErrRsn;
+
+
+/*
+ *	TCAP User Error(MAP VIEW) Reason (for UMTS)
+ */
+/* Generic error codes */
+typedef enum {
+	ERR_TC_U_FACILITY_NOT_SUPPORTED	= 0x6015,
+	ERR_TC_U_INCOMPATIBLE_TERMINAL	= 0x601C,
+	ERR_TC_U_SYSTEM_FAILURE			= 0x6022,
+	ERR_TC_U_DATA_MISSING			= 0x6023,
+	ERR_TC_U_UNEXPECTED_DATA_VAULE	= 0x6024,
+	ERR_TC_U_RESOURCE_LIMITATION	= 0x6033
+} eGenericErrCodes;
+
+/* Identification and numbering error codes */
+typedef enum {
+	ERR_TC_U_UNKNOWN_SUBSCRIBER		= 0x6001,
+	ERR_TC_U_UNIDENTIFIED_SUBSCRIBER = 0x6005
+} eIdentificationAndNumberingErrCodes;
+
+/* Call handling error codes */
+typedef enum {
+	ERR_TC_U_CALL_BARRED			= 0x600D,
+	ERR_TC_U_ABSENT_SUBSCRIBER		= 0x601B
+} eCallHandlingErrCodes;
+
+/* Short Message service error codes */
+typedef enum {
+	ERR_TC_U_ABSENT_SUBSCRIBER_SM		= 0x6006,
+	ERR_TC_U_SUBSCRIBER_BUSY_FOR_MT_SMS	= 0x601F,
+	ERR_TC_U_SM_DELIVERY_FAILURE		= 0x6020,
+	ERR_TC_U_MESSAGE_WAITING_LIST_FULL	= 0x6021
+} eShortMessageServiceErrCodes;
+
+/*  User Error Diagnostic 08.01.29 by twkim */
+typedef enum {
+	ERR_TC_U_ABSENT_SUBSCRIBER_SM_PARAM_BASE = 0x6100,
+	ERR_TC_U_ABSENT_SUB_SM_NO_PAGING_RESPONSE_VIA_THE_MSC = 0x6100,	//24832
+	ERR_TC_U_ABSENT_SUB_SM_IMSI_DETACHED,							//24833
+	ERR_TC_U_ABSENT_SUB_SM_ROAMING_RESTRICTION,						//24834
+	ERR_TC_U_ABSENT_SUB_SM_DEREGISTERED_IN_THE_HLR_FOR_NON_GPRS,	//24835
+	ERR_TC_U_ABSENT_SUB_SM_MS_PURGED_FOR_NON_GPRS,					//24836
+	ERR_TC_U_ABSENT_SUB_SM_NO_PAGING_RESPONSE_VIA_THE_SGSN,			//24837
+	ERR_TC_U_ABSENT_SUB_SM_GPRS_DETACHED,							//24838
+	ERR_TC_U_ABSENT_SUB_SM_DEREGISTERED_IN_THE_HLR_FOR_GPRS,		//24839
+	ERR_TC_U_ABSENT_SUB_SM_MS_PURGED_FOR_GPRS,						//24840
+	ERR_TC_U_ABSENT_SUB_SM_UNIDENTIFIED_SUBSCRIBER_VIA_THE_MSC,		//24841
+	ERR_TC_U_ABSENT_SUB_SM_UNIDENTIFIED_SUBSCRIBER_VIA_THE_SGSN		//24842
+} eAbsentSubscriberSMDiagnosticErrCodes;
+
+/*  User Error Diagnostic 08.01.29 by twkim */
+typedef enum {
+	ERR_TC_U_SM_DELIVERY_FAILURE_PARAM_BASE = 0x6200,
+	ERR_TC_U_SM_DELI_FAIL_MEMORY_CAPA_EXCEEDED = 0x6200,			//25088
+	ERR_TC_U_SM_DELI_FAIL_EQUIPMENT_PROTOCOL_ERROR,					//25089
+	ERR_TC_U_SM_DELI_FAIL_EQUIPMENT_NOT_SM_EQUIPPED,				//25090
+	ERR_TC_U_SM_DELI_FAIL_UNKNOWN_SERVIE_CENTRE,					//25091
+	ERR_TC_U_SM_DELI_FAIL_SC_CONGESTION,							//25092
+	ERR_TC_U_SM_DELI_FAIL_INVALID_SME_ADDRESS,						//25093
+	ERR_TC_U_SM_DELI_FAIL_SUBSCRIBER_NOT_SC_SUBSCRIBER				//25094
+} eDeliveryFailureDiagnosticErrCodes;
+
+/* Subscription error codes */
+typedef enum {
+	ERR_TC_U_ILLEGAL_SUBSCRIBER			= 0x6009,
+	ERR_TC_U_TELESERVICE_NOT_PROVISIONED = 0x600B,
+	ERR_TC_U_ILLEGAL_EQUIPMENT			= 0x600C
+} eSubscriptionErrCodes;
+
+/* HLR return Error Reason */
+typedef enum {
+	ERR_TC_U_SC_MNRG_SET			= 0x7010,
+	ERR_TC_U_SC_MCEF_SET			= 0x7020,
+	ERR_TC_U_SC_MNRF_SET			= 0x7040,
+	ERR_TC_U_SC_ADDRESS_NOT_INCLUDE	= 0x7080
+} eHlrReturnErrRsn;
+
+/*
+ *	SKT Service Error Reason
+ */
+typedef enum {
+	ERR_TC_U_RIFSM_PORTED_OUT		= 0x9001,
+	ERR_TC_U_SKT_DENIED				= 0x9002,
+	ERR_TC_U_OVERFLOW_FROM_MSC		= 0x9003,
+	ERR_SKT_ICONV_ERROR				= 0x9004,
+	ERR_SKT_INTER_SMSMO_DENY		= 0x9005,	// DR240
+	ERR_SKT_ATSI_REQ_SVC 			= 0x9006,   // FR220 010_PLUS_SVC
+	ERR_SKT_CALLBACK_CHG_DENY       = 0x9008,    // DR710 pkg by cbh
+	ERR_SKT_CHILDORDER_RANGE_OVER 	= 0x9009, 	//DR730 HJY
+	ERR_SKT_SCROUTE_DENY_DELETE 	= 0x900a, 	//FR730
+	ERR_SKT_NUMBER_CHANGED 			= 0x900c, 	//SR420
+	ERR_SKT_UNKNOWN_SERVING_NODE 	= 0x900d,	//SR420
+	ERR_SKT_INFO_RATE_DENY 			= 0x900f 	//SR810
+} eSKTServiceErrRsn;
+
+/*
+ *  Dual Sender Error Reason (for KTF & LGT Dual Active)
+ */
+typedef enum {
+	ERR_DUALACT_SEND_ERROR			= 0x8001,  // dual_sender -X-> dual_receiver
+	ERR_DUALACT_ACKRCV_ERROR		= 0x8002,  // dual_sender <-X- dual_receiver
+	ERR_DUALACT_ACKMSG_ERROR		= 0x8003,  // dual_receiver -X-> dbms or etc.
+	ERR_DUALACT_IF_ERROR			= 0x8004   // not connected.
+} eDualSenderErrRsn;
+
+/*
+ *  LGT MNP Query And Processing Error Reason
+ *  (for LGT Mobile Number Portability)
+ */
+typedef enum {
+	ERR_NPQC_SEND_QUERY_FAIL		= 0x9001,
+	ERR_NPQC_INSERT_SENDINFO_FAIL	= 0x9002,
+	ERR_NPDB_SYSTEM_FAIL			= 0x9011,
+	ERR_NPDB_INVALID_FORMAT			= 0x9012,
+	ERR_NPDB_NO_DEST_MIN			= 0x9013,
+	ERR_NPDB_DISCON_PORTNUM			= 0x9014,
+	ERR_NPDB_RES_SHORT				= 0x9015,
+	ERR_NPDB_ETC					= 0x9016,
+	ERR_NPDB_TIMEOUT				= 0x9017,
+	ERR_NPDB_PORTED_OUT				= 0x9018,
+	ERR_NPDB_NOT_CONNECT			= 0x9019
+} eMnpQueryProcErrRsn;
+
+/*
+ *  LGT SMS Plus Error Reason
+ */
+typedef enum {
+	PLUS_ERROR_CATAGORY		= 0x9400,
+	ERR_SPAM_SM				= PLUS_ERROR_CATAGORY, // Spam Callback Number.
+	ERR_BLOCK_SOURCEMIN, 	// 0x9401 -- Blocking by Source MIN.
+	ERR_BLOCK_CALLBACK,		// 0xa402 -- Blocking by CallBack Number.
+	ERR_BLOCK_TELESVCID,	// 0xa403 -- Blocking by TeleServcieID.
+	ERR_BLOCK_MSGCONTENTS,	// 0xa404 -- Blocking by Message Contents.
+	PLUS_ERROR_MAX			= PLUS_ERROR_CATAGORY | 0x00ff
+} eSmsPlusErrRsn;
+
+/* LGT Dual Service Error Reason */
+typedef enum {
+	ERR_ALREADY_RCV_RMIN   			= 0x5001,
+	ERR_SMS_DUALSVC					= 0x5002,
+	ERR_SMS_SKT_DUALSVC_OVER_CNT 	= 0x5003,
+	ERR_SMS_SKT_SPAM 				= 0x5004,
+	ERR_SMS_SKT_DISCONNECT_PICS 	= 0x5005,
+	ERR_SMS_SKT_DISCONNECT_ICS  	= 0x5006,
+	ERR_SMS_SKT_OVERLENGTH_SNAP  	= 0x5007,
+	ERR_SMS_SKT_FORWARDING_FAIL		= 0x5008,	// SKT Forwarding Fail case
+	ERR_SMS_SKT_CFU_UNAVAILABLE		= 0x5009,	// SKT No Forward Condition
+	ERR_SMS_SKT_NUM_CHANGE			= 0X500A,	// SKT Number Change Service (ADR=251)
+	ERR_SMS_SKT_NEW_FORWARDING		= 0X500B,	// SKT New Forwarding Service (ADR=252)
+	ERR_SMS_SKT_FORWARDING_ETC		= 0X500C,	// Forwrading CASE 1.
+	ERR_SMS_SKT_FORWARDING_ESME		= 0x500D,	// Forwarding CASE 2.
+	ERR_SMS_SKT_PORTED_NOTI_SMS		= 0x500E,	// SKT Ported-Noti-SMS (ADR=0x04)
+	ERR_SMS_SKT_FORWARDING_NUM_PLUS  = 0x500F,	// SKT Forwarding PLUS
+	ERR_SMS_SKT_BIZ_NUM 			= 0x5010, 	// SKT BIZ Numer Service
+	ERR_SMS_SKT_SVC_LMS 			= 0x5011,	// SKT LMS Service DR410 LMS_RELAY_SVC
+	ERR_SMS_SKT_UNAVAILABLE_LMS 	= 0x5012,	// SKT LMS Service DR410 LMS_RELAY_SVC
+	ERR_SMS_SKT_LMS_SVC_OFF 		= 0x5013,	// SKT LMS Service OFF DR410 LMS_RELAY_SVC
+	ERR_SMS_SKT_IS_NOT_LMS 			= 0x5014, 	// SKT LMS Service DR410 LMS_RELAY_SVC
+	ERR_SEGMENT_NOT_ENOUGH 			= 0x5015, 	// SKT FR230 ERR_SEGMENT_NOT_ENOUGH
+	ERR_SMS_SKT_SGSN_NODE_OFF       = 0x5016,	// SKT FR310 PKG Two Node On/Off Svc
+	ERR_SMS_SKT_MSC_NODE_OFF        = 0x5017, 	// SKT FR310 PKG Two Node On/Off Svc
+	ERR_SMS_SKT_FORWARDING_MULTINUM = 0x5018,	// SKT Forwarding PLUS
+	ERR_SMS_SKT_TZSMS_FORWARDING_FAIL = 0x5019,
+	ERR_SMS_SKT_TZSMS_ENCRYPT_FAIL 	= 0x501a, 	// SKT TZSMS Encrypt
+	ERR_TZSMS_SYS_FAIL 				= 0x501b,	// TZSMS
+	ERR_TZSMS_MSGQ_FAIL				= 0x501c,	// TZSMS SR320
+	ERR_TZSMS_FC_NACK  				= 0x501d, 	// TZSMS SR320
+	ERR_SMS_SKT_FORWARDING_MCC 		= 0x501e, 	// MCC SR410 
+	ERR_PPS_DENY_MIN 				= 0x501f,   // R910 
+	ERR_MCS_SINGLE_SMS_SKIP 		= 0x5020    // R910 
+} eDualSvcErrRsn;
+
+//FR220 010_PLUS_SVC ATSI Error Code Define
+typedef enum {
+	ERR_ATSI_TC_U_UNEXPECTED_DATA_VAULE             = 0x01,
+	ERR_ATSI_TC_U_UNKNOWN_SUBSCRIBER                = 0x02,
+	ERR_ATSI_BEARER_SERVICE_NOT_PROVISIONTED        = 0x03,
+	ERR_ATSI_TC_U_TELESERVICE_NOT_PROVISIONED       = 0x04,
+	ERR_ATSI_TC_U_CALL_BARRED                       = 0x05,
+	ERR_ATSI_ILLEGAL_SS_OPERATION                   = 0x06,
+	ERR_ATSI_SS_NOT_AVAILABLE                       = 0x07,
+	ERR_ATSI_INFORMATION_NOT_AVAILABLE              = 0x08,
+	ERR_ATSI_ANY_TIME_SUB_INTERROGATION_NOT_ALLOWED = 0x09,
+	ERR_ATSI_TC_U_DATA_MISSING              = 0x0A
+} eATSISvcErrRsn;
+
+
+#define ERR_SMS_SKT_GWSMDPP_DELIVFAIL		0x2071
+#define ERR_SMS_SKT_GWSMPPSUBMIT_DELIVFAIL	0x2071
+#define	ERR_SMS_SKT_GWSMPPRECEIPT_DELIFAIL	0x2072
+
+
+// MME MDB FailReason
+typedef enum {
+	// SUCCESS
+	MME_ERR_SUCCESS = 0,
+	MME_ERR_LIMITED_SUCCESS = 1,
+	// Informational
+	MME_ERR_MULTI_ROUND_AUTH  =  20,
+	// Protocol Error
+	MME_ERR_PROTOCOL = 21,
+	MME_ERR_COMMAND_UNSUPPORTED = 19,
+	MME_ERR_UNABLE_TO_DELIVER  =  22,
+	MME_ERR_REALM_NOT_SERVED  =  23,
+	MME_ERR_TOO_BUSY  =  24,
+	MME_ERR_LOOP_DETECTED  =  25,
+	MME_ERR_REDIRECT_INDICATION  =  26,
+	MME_ERR_APPLICATION_UNSUPPORTED  =  27,
+	MME_ERR_INVALID_HDR_BITS  =  28,
+	MME_ERR_INVALID_AVP_BITS  =  29,
+	MME_ERR_UNKNOWN_PEER  =  30,
+	// Transient Error
+	MME_ERR_TRANSIENT = 83,
+	MME_ERR_AUTHENTICATION_REJECTED  =  31,
+	MME_ERR_OUT_OF_SPACE  =  32,
+	MME_ERR_ELECTION_LOST  =  33,
+	MME_ERR_END_USER_SERVICE_DENIED  =  34,
+	MME_ERR_TRANSIENT_USER_UNKNOWN  =  35,
+	//Permanent Error
+	MME_ERR_PERIMENT = 84,
+	MME_ERR_UNKNOWN_SESSION_ID  =  36,
+	MME_ERR_AUTHORIZATION_REJECTED  =  37,
+	MME_ERR_INVALID_AVP_VALUE  =  38,
+	MME_ERR_MISSING_AVP  =  39,
+	MME_ERR_RESOURCES_EXCEEDED  =  40,
+	MME_ERR_CONTRADICTING_AVPS  =  41,
+	MME_ERR_AVP_NOT_ALLOWED  =  42,
+	MME_ERR_NO_COMMON_APPLICATION  =  43,
+	MME_ERR_UNSUPPORTED_VERSION  =  44,
+	MME_ERR_UNABLE_TO_COMPLY  =  45,
+	MME_ERR_INVALID_BIT_IN_HEADER  =  46,
+	MME_ERR_INVALID_AVP_LENGTH  =  47,
+	MME_ERR_INVALID_MESSAGE_LENGTH  =  48,
+	MME_ERR_INVALID_AVP_BIT_COMBO  =  49,
+	MME_ERR_NO_COMMON_SECURITY  =  50,
+	// Expermanental Error
+	MME_ERR_EXPERIMENTAL = 85,
+	MME_ERR_USER_UNKNOWN  =  60,
+	MME_ERR_ABSENT_USER  =  61,
+	MME_ERR_USER_BUSY_FOR_MT_SMS  =  62,
+	MME_ERR_FACILITY_NOT_SUPPORTED  =  63,
+	MME_ERR_ILLEGAL_USER  =  64,
+	MME_ERR_ILLEGAL_EQUIPMENT  =  65,
+	MME_ERR_SM_DELIVERY_FAILURE  =  66,
+	MME_ERR_SERVICE_NOT_SUBSCRIBED  = 67,
+	MME_ERR_SERVICE_BARRED  = 68,
+	MME_ERR_MWD_LIST_FULL  =  69,
+	MME_ERR_UNKNOWN_SERVING_NODE = 87,
+	MME_ERR_NUMBER_CHANGED = 88,
+	MME_ERR_PORTED_OUT = 89,
+
+	// Etc.
+	MME_ERR_INTERNAL = 80,
+	MME_ERR_TIMEOUT = 81,
+	MME_ERR_PEER_DISCONNECTED = 82,
+	MME_ERR_NODE_OFF = 86,
+
+	// delviery failure
+	MME_DELIVERY_FAILURE_MEMORY_CAPACITY_EXCEEDED   =  0x80,
+	MME_DELIVERY_FAILURE_EQUIPMENT_PROTOCOL_ERROR   =  0x81,
+	MME_DELIVERY_FAILURE_EQUIPMENT_NOT_SM_EQUIPPED   =  0x82,
+	MME_DELIVERY_FAILURE_UNKNOWN_SERVICE_CENTRE   =  0x83,
+	MME_DELIVERY_FAILURE_SC_CONGESTION   =  0x84,
+	MME_DELIVERY_FAILURE_INVALID_SME_ADDRESS   =  0x85,
+	MME_DELIVERY_FAILURE_USER_NOT_SC_USER   =  0x86,
+
+	// absent
+	MME_ABSENT_MME_NO_PAGING_RESPONSE_VIA_THE_MSC  =   0x90,
+	MME_ABSENT_IMSI_DETACHED  =  0x91,
+	MME_ABSENT_ROAMING_RESTRICTION  =  0x92,
+	MME_ABSENT_DEREGISTERED_IN_THE_HLR_FOR_NON_GPRS  =  0x93,
+	MME_ABSENT_MS_PURGED_FOR_NON_GPRS  =  0x94,
+	MME_ABSENT_NO_PAGING_RESPONSE_VIA_THE_SGSN  =  0x95,
+	MME_ABSENT_GPRS_DETACHED  =  0x96,
+	MME_ABSENT_DEREGISTERED_IN_THE_HLR_FOR_GPRS  =  0x97,
+	MME_ABSENT_MS_PURGED_FOR_GPRS  =  0x98,
+	MME_ABSENT_UNIDENTIFIED_SUBSCRIBER_VIA_THE_MSC  =  0x99,
+	MME_ABSENT_UNIDENTIFIED_SUBSCRIBER_VIA_THE_SGSN  =  0x9A,
+	MME_ABSENT_DEREGISTERED_IN_THE_HSS_HLR_FOR_IMS  =  0x9B,
+	MME_ABSENT_NO_RESPONSE_VIA_THE_IP_SM_GW  =  0x9C
+} MME_MDB_FAIL_REASON_ENUM;
+
+typedef enum {
+	ERR_MME_FAIL_BASE = 0x6300,
+	// Informational
+	ERR_MME_MULTI_ROUND_AUTH = ERR_MME_FAIL_BASE + MME_ERR_MULTI_ROUND_AUTH,
+	// Protocol Error
+	ERR_MME_PROTOCOL = ERR_MME_FAIL_BASE + MME_ERR_PROTOCOL,
+	ERR_MME_COMMAND_UNSUPPORTED = ERR_MME_FAIL_BASE + MME_ERR_COMMAND_UNSUPPORTED,
+	ERR_MME_UNABLE_TO_DELIVER = ERR_MME_FAIL_BASE + MME_ERR_UNABLE_TO_DELIVER,
+	ERR_MME_REALM_NOT_SERVED = ERR_MME_FAIL_BASE + MME_ERR_REALM_NOT_SERVED,
+	ERR_MME_TOO_BUSY = ERR_MME_FAIL_BASE + MME_ERR_TOO_BUSY,
+	ERR_MME_LOOP_DETECTED = ERR_MME_FAIL_BASE + MME_ERR_LOOP_DETECTED,
+	ERR_MME_REDIRECT_INDICATION = ERR_MME_FAIL_BASE + MME_ERR_REDIRECT_INDICATION,
+	ERR_MME_APPLICATION_UNSUPPORTED = ERR_MME_FAIL_BASE + MME_ERR_APPLICATION_UNSUPPORTED,
+	ERR_MME_INVALID_HDR_BITS = ERR_MME_FAIL_BASE + MME_ERR_INVALID_HDR_BITS,
+	ERR_MME_INVALID_AVP_BITS = ERR_MME_FAIL_BASE + MME_ERR_INVALID_AVP_BITS,
+	ERR_MME_UNKNOWN_PEER = ERR_MME_FAIL_BASE + MME_ERR_UNKNOWN_PEER,
+	// Transient Error
+	ERR_MME_TRANSIENT = ERR_MME_FAIL_BASE + MME_ERR_TRANSIENT,
+	ERR_MME_AUTHENTICATION_REJECTED = ERR_MME_FAIL_BASE + MME_ERR_AUTHENTICATION_REJECTED,
+	ERR_MME_OUT_OF_SPACE = ERR_MME_FAIL_BASE + MME_ERR_OUT_OF_SPACE,
+	ERR_MME_ELECTION_LOST = ERR_MME_FAIL_BASE + MME_ERR_ELECTION_LOST,
+	ERR_MME_END_USER_SERVICE_DENIED = ERR_MME_FAIL_BASE + MME_ERR_END_USER_SERVICE_DENIED,
+	ERR_MME_TRANSIENT_USER_UNKNOWN = ERR_MME_FAIL_BASE + MME_ERR_TRANSIENT_USER_UNKNOWN,
+	//Permanent Error
+	ERR_MME_PERIMENT = ERR_MME_FAIL_BASE + MME_ERR_PERIMENT,
+	ERR_MME_UNKNOWN_SESSION_ID = ERR_MME_FAIL_BASE + MME_ERR_UNKNOWN_SESSION_ID,
+	ERR_MME_AUTHORIZATION_REJECTED = ERR_MME_FAIL_BASE + MME_ERR_AUTHORIZATION_REJECTED,
+	ERR_MME_INVALID_AVP_VALUE = ERR_MME_FAIL_BASE + MME_ERR_INVALID_AVP_VALUE,
+	ERR_MME_MISSING_AVP = ERR_MME_FAIL_BASE + MME_ERR_MISSING_AVP,
+	ERR_MME_RESOURCES_EXCEEDED = ERR_MME_FAIL_BASE + MME_ERR_RESOURCES_EXCEEDED,
+	ERR_MME_CONTRADICTING_AVPS = ERR_MME_FAIL_BASE + MME_ERR_CONTRADICTING_AVPS,
+	ERR_MME_AVP_NOT_ALLOWED = ERR_MME_FAIL_BASE + MME_ERR_AVP_NOT_ALLOWED,
+	ERR_MME_NO_COMMON_APPLICATION = ERR_MME_FAIL_BASE + MME_ERR_NO_COMMON_APPLICATION,
+	ERR_MME_UNSUPPORTED_VERSION = ERR_MME_FAIL_BASE + MME_ERR_UNSUPPORTED_VERSION,
+	ERR_MME_UNABLE_TO_COMPLY = ERR_MME_FAIL_BASE + MME_ERR_UNABLE_TO_COMPLY,
+	ERR_MME_INVALID_BIT_IN_HEADER = ERR_MME_FAIL_BASE + MME_ERR_INVALID_BIT_IN_HEADER,
+	ERR_MME_INVALID_AVP_LENGTH = ERR_MME_FAIL_BASE + MME_ERR_INVALID_AVP_LENGTH,
+	ERR_MME_INVALID_MESSAGE_LENGTH = ERR_MME_FAIL_BASE + MME_ERR_INVALID_MESSAGE_LENGTH,
+	ERR_MME_INVALID_AVP_BIT_COMBO = ERR_MME_FAIL_BASE + MME_ERR_INVALID_AVP_BIT_COMBO,
+	ERR_MME_NO_COMMON_SECURITY = ERR_MME_FAIL_BASE + MME_ERR_NO_COMMON_SECURITY,
+	// Expermanental Error
+	ERR_MME_EXPERIMENTAL = ERR_MME_FAIL_BASE + MME_ERR_EXPERIMENTAL,
+	ERR_MME_USER_UNKNOWN = ERR_MME_FAIL_BASE + MME_ERR_USER_UNKNOWN,
+	ERR_MME_ABSENT_USER = ERR_MME_FAIL_BASE + MME_ERR_ABSENT_USER,
+	ERR_MME_USER_BUSY_FOR_MT_SMS = ERR_MME_FAIL_BASE + MME_ERR_USER_BUSY_FOR_MT_SMS,
+	ERR_MME_FACILITY_NOT_SUPPORTED = ERR_MME_FAIL_BASE + MME_ERR_FACILITY_NOT_SUPPORTED,
+	ERR_MME_ILLEGAL_USER = ERR_MME_FAIL_BASE + MME_ERR_ILLEGAL_USER,
+	ERR_MME_ILLEGAL_EQUIPMENT = ERR_MME_FAIL_BASE + MME_ERR_ILLEGAL_EQUIPMENT,
+	ERR_MME_SM_DELIVERY_FAILURE = ERR_MME_FAIL_BASE + MME_ERR_SM_DELIVERY_FAILURE,
+	ERR_MME_SERVICE_NOT_SUBSCRIBED = ERR_MME_FAIL_BASE + MME_ERR_SERVICE_NOT_SUBSCRIBED,
+	ERR_MME_SERVICE_BARRED = ERR_MME_FAIL_BASE + MME_ERR_SERVICE_BARRED,
+	ERR_MME_MWD_LIST_FULL = ERR_MME_FAIL_BASE + MME_ERR_MWD_LIST_FULL,
+	ERR_MME_UNKNOWN_SERVING_NODE = ERR_MME_FAIL_BASE + MME_ERR_UNKNOWN_SERVING_NODE,
+	ERR_MME_NUMBER_CHANGED = ERR_MME_FAIL_BASE + MME_ERR_NUMBER_CHANGED,
+
+	// Etc.
+	ERR_MME_INTERNAL = ERR_MME_FAIL_BASE + MME_ERR_INTERNAL,
+	ERR_MME_TIMEOUT = ERR_MME_FAIL_BASE + MME_ERR_TIMEOUT,
+	ERR_MME_PEER_DISCONNECTED = ERR_MME_FAIL_BASE + MME_ERR_PEER_DISCONNECTED,
+	ERR_SMS_SKT_MME_NODE_OFF 		= ERR_MME_FAIL_BASE + MME_ERR_NODE_OFF,
+
+	ERR_MME_DELIVERY_FAILURE_MEMORY_CAPACITY_EXCEEDED = ERR_MME_FAIL_BASE + MME_DELIVERY_FAILURE_MEMORY_CAPACITY_EXCEEDED,
+	ERR_MME_DELIVERY_FAILURE_EQUIPMENT_PROTOCOL_ERROR = ERR_MME_FAIL_BASE + MME_DELIVERY_FAILURE_EQUIPMENT_PROTOCOL_ERROR,
+	ERR_MME_DELIVERY_FAILURE_EQUIPMENT_NOT_SM_EQUIPPED = ERR_MME_FAIL_BASE + MME_DELIVERY_FAILURE_EQUIPMENT_NOT_SM_EQUIPPED,
+	ERR_MME_DELIVERY_FAILURE_UNKNOWN_SERVICE_CENTRE = ERR_MME_FAIL_BASE + MME_DELIVERY_FAILURE_UNKNOWN_SERVICE_CENTRE,
+	ERR_MME_DELIVERY_FAILURE_SC_CONGESTION = ERR_MME_FAIL_BASE + MME_DELIVERY_FAILURE_SC_CONGESTION,
+	ERR_MME_DELIVERY_FAILURE_INVALID_SME_ADDRESS = ERR_MME_FAIL_BASE + MME_DELIVERY_FAILURE_INVALID_SME_ADDRESS,
+	ERR_MME_DELIVERY_FAILURE_USER_NOT_SC_USER = ERR_MME_FAIL_BASE + MME_DELIVERY_FAILURE_USER_NOT_SC_USER,
+
+	ERR_MME_ABSENT_MME_NO_PAGING_RESPONSE_VIA_THE_MSC = ERR_MME_FAIL_BASE + MME_ABSENT_MME_NO_PAGING_RESPONSE_VIA_THE_MSC,
+	ERR_MME_ABSENT_IMSI_DETACHED = ERR_MME_FAIL_BASE + MME_ABSENT_IMSI_DETACHED,
+	ERR_MME_ABSENT_ROAMING_RESTRICTION = ERR_MME_FAIL_BASE + MME_ABSENT_ROAMING_RESTRICTION,
+	ERR_MME_ABSENT_DEREGISTERED_IN_THE_HLR_FOR_NON_GPRS = ERR_MME_FAIL_BASE + MME_ABSENT_DEREGISTERED_IN_THE_HLR_FOR_NON_GPRS,
+	ERR_MME_ABSENT_MS_PURGED_FOR_NON_GPRS = ERR_MME_FAIL_BASE + MME_ABSENT_MS_PURGED_FOR_NON_GPRS,
+	ERR_MME_ABSENT_NO_PAGING_RESPONSE_VIA_THE_SGSN = ERR_MME_FAIL_BASE + MME_ABSENT_NO_PAGING_RESPONSE_VIA_THE_SGSN,
+	ERR_MME_ABSENT_GPRS_DETACHED = ERR_MME_FAIL_BASE + MME_ABSENT_GPRS_DETACHED,
+	ERR_MME_ABSENT_DEREGISTERED_IN_THE_HLR_FOR_GPRS = ERR_MME_FAIL_BASE + MME_ABSENT_DEREGISTERED_IN_THE_HLR_FOR_GPRS,
+	ERR_MME_ABSENT_MS_PURGED_FOR_GPRS = ERR_MME_FAIL_BASE + MME_ABSENT_MS_PURGED_FOR_GPRS,
+	ERR_MME_ABSENT_UNIDENTIFIED_SUBSCRIBER_VIA_THE_MSC = ERR_MME_FAIL_BASE + MME_ABSENT_UNIDENTIFIED_SUBSCRIBER_VIA_THE_MSC,
+	ERR_MME_ABSENT_UNIDENTIFIED_SUBSCRIBER_VIA_THE_SGSN = ERR_MME_FAIL_BASE + MME_ABSENT_UNIDENTIFIED_SUBSCRIBER_VIA_THE_SGSN,
+	ERR_MME_ABSENT_DEREGISTERED_IN_THE_HSS_HLR_FOR_IMS = ERR_MME_FAIL_BASE + MME_ABSENT_DEREGISTERED_IN_THE_HSS_HLR_FOR_IMS,
+	ERR_MME_ABSENT_NO_RESPONSE_VIA_THE_IP_SM_GW = ERR_MME_FAIL_BASE + MME_ABSENT_NO_RESPONSE_VIA_THE_IP_SM_GW
+} MME_FAILREASON_ENUM;
+
+typedef enum{
+	SOI_BAD_REQUEST  				= 400,
+	SOI_UNAUTHORIZED  				= 401,
+	SOI_FORBIDDEN 					= 403,
+	SOI_NOT_FOUND 					= 404,
+	SOI_NOT_ACCEPTABLE 				= 406,
+	SOI_REQUEST_TIMEOUT 			= 408,
+	SOI_TEMPORARILY_NOT_AVAILABLE 	= 480,
+	SOI_TOO_MANY_HOPS 				= 483,
+	SOI_SERVER_INTERNAL_ERROR 		= 500,
+	SOI_BAD_GATEWAY 				= 502,
+	SOI_SERVICE_UNAVAILABLE 		= 503,
+	SOI_SOI_REQUEST_TIMEOUT_NET 	= 703,
+	SOI_NODE_SVC_OFF 				= 900,
+	SOI_NODE_DISCONN 				= 901,
+	SOI_DR_WAIT_TIMEOUT 			= 902,
+	SOI_OTHER 						= 903
+}e_soi_sip;
+
+typedef enum{
+	SOI_REASON_REQUEST_TIMEOUT_UE1 		= 7003,
+	SOI_REASON_REQUEST_TIMEOUT_UE2 		= 7013
+}e_soi_sip_reason;
+
+typedef enum {
+	ERR_SOI_SIP_BASE = 0x4000,
+	ERR_SOI_BAD_REQUEST                 = ERR_SOI_SIP_BASE + SOI_BAD_REQUEST,                //SIP_400_BAD_REQ
+	ERR_SOI_UNAUTHORIZED 				= ERR_SOI_SIP_BASE + SOI_UNAUTHORIZED,               //SIP_401_UNAUTHORIZED
+	ERR_SOI_FORBIDDEN                   = ERR_SOI_SIP_BASE + SOI_FORBIDDEN,                  //SIP_403_FORBIDDEN
+	ERR_SOI_NOT_FOUND                   = ERR_SOI_SIP_BASE + SOI_NOT_FOUND,                  //SIP_404_NOT_FOUND
+	ERR_SOI_NOT_ACCEPTABLE 				= ERR_SOI_SIP_BASE + SOI_NOT_ACCEPTABLE,             //SIP_406_NOT_ACCEPTABLE
+	ERR_SOI_REQUEST_TIMEOUT             = ERR_SOI_SIP_BASE + SOI_REQUEST_TIMEOUT,            // SIP_408_REQUEST_TIMEOUT_UE 16792 CC_1208 reason 7003 7012
+	ERR_SOI_TEMPORARILY_NOT_AVAILABLE   = ERR_SOI_SIP_BASE + SOI_TEMPORARILY_NOT_AVAILABLE,  //SIP_480_TEMPORARILY_UNAVAILABLE
+	ERR_SOI_TOO_MANY_HOPS               = ERR_SOI_SIP_BASE + SOI_TOO_MANY_HOPS,              //SIP_OTHER_ERROR       
+	ERR_SOI_SERVER_INTERNAL_ERROR       = ERR_SOI_SIP_BASE + SOI_SERVER_INTERNAL_ERROR ,     //SIP_500_SERVER_INTERNAL_ERROR
+	ERR_SOI_BAD_GATEWAY 				= ERR_SOI_SIP_BASE + SOI_BAD_GATEWAY,                //SIP_502_BAD_GATEWAY
+	ERR_SOI_SERVICE_UNAVAILABLE         = ERR_SOI_SIP_BASE + SOI_SERVICE_UNAVAILABLE,        //SIP_503_SERVICE_UNAVAILABLE 
+	ERR_SOI_REQUEST_TIMEOUT_NET 		= ERR_SOI_SIP_BASE + SOI_SOI_REQUEST_TIMEOUT_NET, 	 // SIP_408_REQUEST_TIMEOUT_NET 17087 CC_1214 reason 7003 7012
+	ERR_SOI_NODE_SVC_OFF                = ERR_SOI_SIP_BASE + SOI_NODE_SVC_OFF,               //SIP_OTHER_ERROR
+	ERR_SOI_NODE_DISCONN                = ERR_SOI_SIP_BASE + SOI_NODE_DISCONN,               //SIP_OTHER_ERROR
+	ERR_SOI_DR_WAIT_TIMEOUT 			= ERR_SOI_SIP_BASE + SOI_DR_WAIT_TIMEOUT, 			 //SIP_OTHER_ERROR
+	ERR_SOI_OTHER 						= ERR_SOI_SIP_BASE + SOI_OTHER 						 //SIP_OTHER_ERROR
+}e_pony_soi_sip;    
+
+// RP-ERROR PONYLINK SPECIFIC 
+#define ERR_PROFILE_DATA_NOT_EXIST 			200 
+
+//MO RP-ERROR
+#define UNASSIGNED_NUMBER                                           1 
+#define OPERATOR_DETERMINED_BARRING                                 8 
+#define CALL_BARRED                                                 10 
+#define SHORT_MESSAGE_TRANSFER_REJECTED                             21 
+#define DESTINATION_OUT_OF_ORDER                                    27 
+#define UNIDENTIFIED_SUBSCRIBER                                     28 
+#define FACILITY_REJECTED                                           29 
+#define UNKNOWN_SUBSCRIBER                                          30 
+#define NETWORK_OUT_OF_ORDER                                        38 
+#define TEMPORARY_FAILURE                                           41 
+#define CONGESTION                                                  42 
+#define RESOURCES_UNAVAILABLE_UNSPECIFIED                          	47 
+#define REQUESTED_FACILITY_NOT_SUBSCRIBED                           50 
+#define REQUESTED_FACILITY_NOT_IMPLEMENTED                          69 
+#define INVALID_SHORT_MESSAGE_TRANSFER_REFERENCE_VALUE              81 
+#define SEMANTICALLY_INCORRECT_MESSAGE                              95 
+#define INVALID_MANDATORY_INFORMATION                               96 
+#define MESSAGE_TYPE_NON_EXISTENT_OR_NOT_IMPLEMENTED                97 
+#define MESSAGE_NOT_COMPATIBLE_WITH_SHORT_MESSAGE_PROTOCOL_STATE    98 
+#define INFORMATION_ELEMENT_NON_EXISTENT_OR_NOT_IMPLEMENTED         99 
+#define PROTOCOL_ERROR_UNSPECIFIED                                 	111
+#define INTERWORKING_UNSPECIFIED                                   	127
+
+//MT RP-ERROR
+#define MEMORY_CAPACITY_EXCEEDED                                            22 
+// 81 ~ 99 MO MT common code
+//#define INVALID_SHORT_MESSAGE_TRANSFER_REFERENCE_VALUE                      81 
+//#define SEMANTICALLY_INCORRECT_MESSAGE                                      95 
+//#define INVALID_MANDATORY_INFORMATION                                       96 
+//#define MESSAGE_TYPE_NON_EXISTENT_OR_NOT_IMPLEMENTED                        97 
+//#define MESSAGE_NOT_COMPATIBLE_WITH_SHORT_MESSAGE_PROTOCOL_STATE            98 
+//#define INFORMATION_ELEMENT_NON_EXISTENT_OR_NOT_IMPLEMENTED                 99 
+#define PROTOCOL_ERROR_UNSPECIFIED                                          111
+
+typedef enum {
+	SOI_Memory_capacity_exceeded 									= 22,
+	SOI_Invalid_short_message_transfer_reference_value 				= 81,
+	SOI_Semantically_incorrect_message 								= 95,
+	SOI_Invalid_mandatory_information 								= 96,
+	SOI_Message_type_nonexistent_or_not_implemented 				= 97,
+	SOI_Message_not_compatible_with_short_message_protocol_state 	= 98,
+	SOI_Information_element_nonexistent_or_not_implemented 			= 99,
+	SOI_Protocol_error_unspecified 									= 111
+}e_soi_sip_rp;
+
+typedef enum {
+	ERR_SOI_SIP_RP_BASE = 0x4500,
+	ERR_SOI_Memory_capacity_exceeded                                    = ERR_SOI_SIP_RP_BASE + SOI_Memory_capacity_exceeded,
+	ERR_SOI_Invalid_short_message_transfer_reference_value              = ERR_SOI_SIP_RP_BASE + SOI_Invalid_short_message_transfer_reference_value,
+	ERR_SOI_Semantically_incorrect_message                              = ERR_SOI_SIP_RP_BASE + SOI_Semantically_incorrect_message,
+	ERR_SOI_Invalid_mandatory_information                               = ERR_SOI_SIP_RP_BASE + SOI_Invalid_mandatory_information,
+	ERR_SOI_Message_type_nonexistent_or_not_implemented                 = ERR_SOI_SIP_RP_BASE + SOI_Message_type_nonexistent_or_not_implemented,
+	ERR_SOI_Message_not_compatible_with_short_message_protocol_state    = ERR_SOI_SIP_RP_BASE + SOI_Message_not_compatible_with_short_message_protocol_state,
+	ERR_SOI_Information_element_nonexistent_or_not_implemented          = ERR_SOI_SIP_RP_BASE + SOI_Information_element_nonexistent_or_not_implemented,
+	ERR_SOI_Protocol_error_unspecified                                  = ERR_SOI_SIP_RP_BASE + SOI_Protocol_error_unspecified
+}e_pony_soi_sip_rp;
+
+typedef enum {
+	SOI_Short_message_Type_0_not_supported  = 129,
+	SOI_Cannot_replace_short_message        = 130,
+	SOI_Unspecified_TP_PID_error            = 143,
+	SOI_Message_class_not_supported         = 145,
+	SOI_Unspecified_TP_DCS_error            = 159,
+	SOI_TPDU_not_supported                  = 176,
+	SOI_USIM_SMS_storage_full               = 208,
+	SOI_No_SMS_storage_capability_in_USIM   = 209,
+	SOI_Error_in_MS                         = 210,
+	SOI_TP_Memory_Capacity_Exceeded            = 211,
+	SOI_USIM_Application_Toolkit_Busy       = 212,
+	SOI_USIM_data_download_error            = 213,
+	SOI_Values_specific_to_an_application   = 224, // 224-254
+	SOI_Unspecified_error_cause             = 255
+}e_soi_sip_tp;
+
+typedef enum {
+	ERR_SOI_SIP_TP_BASE = 0x4600,
+	ERR_SOI_Short_message_Type_0_not_supported = ERR_SOI_SIP_TP_BASE + SOI_Short_message_Type_0_not_supported,
+	ERR_SOI_Cannot_replace_short_message       = ERR_SOI_SIP_TP_BASE + SOI_Cannot_replace_short_message,
+	ERR_SOI_Unspecified_TP_PID_error           = ERR_SOI_SIP_TP_BASE + SOI_Unspecified_TP_PID_error,
+	ERR_SOI_Message_class_not_supported        = ERR_SOI_SIP_TP_BASE + SOI_Message_class_not_supported,
+	ERR_SOI_Unspecified_TP_DCS_error           = ERR_SOI_SIP_TP_BASE + SOI_Unspecified_TP_DCS_error,
+	ERR_SOI_TPDU_not_supported                 = ERR_SOI_SIP_TP_BASE + SOI_TPDU_not_supported,
+	ERR_SOI_USIM_SMS_storage_full              = ERR_SOI_SIP_TP_BASE + SOI_USIM_SMS_storage_full,
+	ERR_SOI_No_SMS_storage_capability_in_USIM  = ERR_SOI_SIP_TP_BASE + SOI_No_SMS_storage_capability_in_USIM,
+	ERR_SOI_Error_in_MS                        = ERR_SOI_SIP_TP_BASE + SOI_Error_in_MS,
+	ERR_SOI_Memory_Capacity_Exceeded           = ERR_SOI_SIP_TP_BASE + SOI_TP_Memory_Capacity_Exceeded,
+	ERR_SOI_USIM_Application_Toolkit_Busy      = ERR_SOI_SIP_TP_BASE + SOI_USIM_Application_Toolkit_Busy,
+	ERR_SOI_USIM_data_download_error           = ERR_SOI_SIP_TP_BASE + SOI_USIM_data_download_error,
+	ERR_SOI_Values_specific_to_an_application  = ERR_SOI_SIP_TP_BASE + SOI_Values_specific_to_an_application,
+	ERR_SOI_Unspecified_error_cause            = ERR_SOI_SIP_TP_BASE + SOI_Unspecified_error_cause
+}e_pony_soi_sip_tp;
+#endif 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

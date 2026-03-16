@@ -1,0 +1,477 @@
+#ifndef AVP_DEF
+#error AVP_DEF not defined.
+#endif
+
+#ifndef AVP_ENUM_TYPE
+#error AVP_DEF_ENUM not defined.
+#endif
+
+#ifndef AVP_GROUP_OPTIONAL
+#error AVP_GROUP_OPTIONAL not defined.
+#endif
+
+#ifndef AVP_GROUP_MANDANTORY
+#error AVP_GROUP_MANDANTORY not defined.
+#endif
+
+#ifndef AVP_GROUP_LIST_OPTIONAL
+#error AVP_GROUP_LIST_OPTIONAL not defined.
+#endif
+
+#ifndef AVP_GROUP_LIST_MANDANTORY
+#error AVP_GROUP_LIST_MANDANTORY not defined.
+#endif
+
+#ifndef INTF_AVP_FIX 
+#error INTF_AVP_FIX not defined.
+#endif
+
+#ifndef INTF_AVP_OPTIONAL 
+#error INTF_AVP_OPTIONAL not defined.
+#endif
+
+#ifndef INTF_AVP_MANDANTORY 
+#error INTF_AVP_MANDANTORY not defined.
+#endif
+
+#ifndef INTF_AVP_LIST_OPTIONAL
+#error INTF_AVP_LIST_OPTIONAL not defined.
+#endif
+
+#ifndef INTF_AVP_LIST_MANDANTORY
+#error INTF_AVP_LIST_MANDANTORY not defined.
+#endif
+
+#ifndef DIAMETER_INTF
+#error DIAMETER_INTF not defined.
+#endif
+
+#include "avp.def"
+
+// DIAMETER_INTF(index, NAME, "Full-Name", Command-Code, REQ PXY, APPLICATION_ID, fields)
+DIAMETER_INTF(OFR, MO-Forward-Short-Message-Request, 8388645, 1, 1, 16777313,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(destination_host)
+		INTF_AVP_MANDANTORY(destination_realm)
+		INTF_AVP_MANDANTORY(sc_address)
+		INTF_AVP_OPTIONAL(ofr_flags)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_MANDANTORY(user_identifier)
+		INTF_AVP_MANDANTORY(sm_rp_ui)
+		INTF_AVP_OPTIONAL(smsmi_correlation_id)
+		INTF_AVP_OPTIONAL(sm_delivery_outcome)
+		INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(route_record, 0, 0)
+		INTF_AVP_OPTIONAL(skt_osfi)
+		INTF_AVP_OPTIONAL(skt_sms_osfi)
+		INTF_AVP_OPTIONAL(skt_roam_ind)
+		INTF_AVP_OPTIONAL(skt_sms_roam_pmn)
+)
+
+DIAMETER_INTF(OFA, MO-Forward-Short-Message-Answer, 8388645, 0, 1, 16777313,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_OPTIONAL(result_code)
+		INTF_AVP_OPTIONAL(experimental_result)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_OPTIONAL(sm_delivery_failure_cause)
+		INTF_AVP_OPTIONAL(sm_rp_ui)
+		INTF_AVP_LIST_OPTIONAL(failed_avp, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(route_record, 0, 0)
+)
+
+DIAMETER_INTF(TFR, MT-Forward-Short-Message-Request, 8388646, 1, 1, 16777313,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_MANDANTORY(destination_host)
+		INTF_AVP_MANDANTORY(destination_realm)
+		INTF_AVP_MANDANTORY(user_name)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_OPTIONAL(smsmi_correlation_id)
+		INTF_AVP_MANDANTORY(sc_address)
+		INTF_AVP_MANDANTORY(sm_rp_ui)
+		INTF_AVP_OPTIONAL(mme_number_for_mt_sms)
+		INTF_AVP_OPTIONAL(sgsn_number)
+		INTF_AVP_OPTIONAL(tfr_flags)
+		INTF_AVP_OPTIONAL(sm_delivery_timer)
+		INTF_AVP_OPTIONAL(sm_delivery_start_time)
+		INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(route_record, 0, 0)
+		INTF_AVP_OPTIONAL(skt_osfi)
+		INTF_AVP_OPTIONAL(skt_sms_osfi)
+)
+
+DIAMETER_INTF(TFA, MT-Forward-Short-Message-Answer, 8388646, 0, 1, 16777313,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_OPTIONAL(result_code)
+		INTF_AVP_OPTIONAL(experimental_result)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_OPTIONAL(absent_user_diagnostic_sm)
+		INTF_AVP_OPTIONAL(sm_delivery_failure_cause)
+		INTF_AVP_OPTIONAL(sm_rp_ui)
+		INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(route_record, 0, 0)
+)
+
+DIAMETER_INTF(CER, Capabilities-Exchange-Request, 257, 1, 0, 0,
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_LIST_MANDANTORY(host_ip_address, 1, 0)
+		INTF_AVP_MANDANTORY(vendor_id)
+		INTF_AVP_MANDANTORY(product_name)
+		INTF_AVP_OPTIONAL(origin_state_id)
+		INTF_AVP_LIST_OPTIONAL(supported_vendor_id, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(auth_application_id, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(inband_security_id, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(acct_application_id, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(vendor_specific_application_id, 0, 0)
+		INTF_AVP_OPTIONAL(firmware_revision)
+)
+
+DIAMETER_INTF(CEA, Capabilities-Exchange-Answer, 257, 0, 0, 0,
+		INTF_AVP_MANDANTORY(result_code)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_LIST_MANDANTORY(host_ip_address, 1, 0)
+		INTF_AVP_MANDANTORY(vendor_id)
+		INTF_AVP_MANDANTORY(product_name)
+		INTF_AVP_OPTIONAL(origin_state_id)
+		INTF_AVP_OPTIONAL(error_message)
+		INTF_AVP_LIST_OPTIONAL(failed_avp, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(supported_vendor_id, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(auth_application_id, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(inband_security_id, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(acct_application_id, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(vendor_specific_application_id, 0, 0)
+		INTF_AVP_OPTIONAL(firmware_revision)
+)
+
+DIAMETER_INTF(DPR, Disconnecting-Peer-Connections-Request, 282, 1, 0, 0,
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_MANDANTORY(disconnect_cause)
+)
+
+DIAMETER_INTF(DPA, Disconnecting-Peer-Connections-Answer, 282, 0, 0, 0,
+		INTF_AVP_MANDANTORY(result_code)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(error_message)
+		INTF_AVP_LIST_OPTIONAL(failed_avp, 0, 0)
+)
+
+DIAMETER_INTF(DWR, Device-Watchdog-Request, 280, 1, 0, 0,
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(origin_state_id)
+)
+
+DIAMETER_INTF( DWA, Device-Watchdog-Answer, 280, 0, 0, 0,
+		INTF_AVP_MANDANTORY(result_code)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(error_message)
+		INTF_AVP_LIST_OPTIONAL(failed_avp, 0, 0)
+		INTF_AVP_OPTIONAL(origin_state_id)
+)
+
+DIAMETER_INTF(SRR, Send-Routing-Info-for-SM-Request, 8388647, 1, 1, 16777312,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(destination_host)
+		INTF_AVP_MANDANTORY(destination_realm)
+		INTF_AVP_OPTIONAL(msisdn)
+		INTF_AVP_OPTIONAL(user_name)
+		INTF_AVP_OPTIONAL(smsmi_correlation_id)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_OPTIONAL(sc_address)
+		INTF_AVP_OPTIONAL(srr_flags)
+		INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(route_record, 0, 0)
+		INTF_AVP_OPTIONAL(np_forward_information)
+		INTF_AVP_OPTIONAL(additional_request_subscriber_info)
+)
+
+DIAMETER_INTF(SRA, Send-Routing-Info-for-SM-Answer, 8388647, 0, 1, 16777312,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_OPTIONAL(result_code)
+		INTF_AVP_OPTIONAL(experimental_result)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(user_name)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_OPTIONAL(serving_node)
+		INTF_AVP_OPTIONAL(additional_serving_node)
+		INTF_AVP_OPTIONAL(lmsi)
+		INTF_AVP_OPTIONAL(user_identifier)
+		INTF_AVP_OPTIONAL(mwd_status)
+		INTF_AVP_OPTIONAL(mme_absent_user_diagnostic_sm)
+		INTF_AVP_OPTIONAL(msc_absent_user_diagnostic_sm)
+		INTF_AVP_OPTIONAL(sgsn_absent_user_diagnostic_sm)
+		INTF_AVP_LIST_OPTIONAL(failed_avp, 0, 0)
+		INTF_AVP_OPTIONAL(cdma_min)
+		INTF_AVP_OPTIONAL(cdma_esn)
+		INTF_AVP_OPTIONAL(sms_access_denied_reason)
+		INTF_AVP_OPTIONAL(secondary_msisdn)
+		INTF_AVP_OPTIONAL(sms_capability)
+		INTF_AVP_OPTIONAL(additional_request_subscriber_info)
+		INTF_AVP_OPTIONAL(absent_user_diagnostic_sm)
+)
+
+DIAMETER_INTF(ALR, Alert-Service-Centre-Request, 8388648, 1, 1, 16777312,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(destination_host)
+		INTF_AVP_MANDANTORY(destination_realm)
+		INTF_AVP_MANDANTORY(sc_address)
+		INTF_AVP_MANDANTORY(user_identifier)
+		INTF_AVP_OPTIONAL(smsmi_correlation_id)
+		INTF_AVP_OPTIONAL(maximum_ue_availability_time)
+		INTF_AVP_OPTIONAL(sms_gmsc_alert_event)
+		INTF_AVP_OPTIONAL(serving_node)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(route_record, 0, 0)
+)
+
+DIAMETER_INTF(ALA, Alert-Service-Centre-Answer, 8388648, 0, 1, 16777312,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_OPTIONAL(result_code)
+		INTF_AVP_OPTIONAL(experimental_result)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(failed_avp, 0, 0)
+)
+
+
+DIAMETER_INTF(RDR, Report-SM-Delivery-Status-Request, 8388649, 1, 1, 16777312,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(destination_host)
+		INTF_AVP_MANDANTORY(destination_realm)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_MANDANTORY(user_identifier)
+		INTF_AVP_MANDANTORY(sc_address)
+		INTF_AVP_OPTIONAL(sm_delivery_outcome)
+		INTF_AVP_OPTIONAL(rdr_flags)
+		INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(route_record, 0, 0)
+)
+
+DIAMETER_INTF(RDA, Report-SM-Delivery-Status-Answer, 8388649, 0, 1, 16777312,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_OPTIONAL(result_code)
+		INTF_AVP_OPTIONAL(experimental_result)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_OPTIONAL(user_identifier)
+		INTF_AVP_LIST_OPTIONAL(failed_avp, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+		INTF_AVP_LIST_OPTIONAL(route_record, 0, 0)
+)
+
+DIAMETER_INTF(PUR, Profile-Update-Request, 307, 1, 1, 16777217,                                                
+        INTF_AVP_FIX(session_id)                                                                               
+        INTF_AVP_OPTIONAL(vendor_specific_application_id)                                                      
+        INTF_AVP_MANDANTORY(auth_session_state) 
+        INTF_AVP_MANDANTORY(origin_host)
+        INTF_AVP_MANDANTORY(origin_realm) 
+        INTF_AVP_OPTIONAL(destination_host)
+        INTF_AVP_MANDANTORY(destination_realm) 
+        INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+        INTF_AVP_MANDANTORY(user_identity)
+        INTF_AVP_OPTIONAL(wildcarded_public_identity)
+        INTF_AVP_OPTIONAL(wildcarded_impu)
+        INTF_AVP_OPTIONAL(user_name)                                                                           
+        INTF_AVP_MANDANTORY(data_reference) 
+        INTF_AVP_MANDANTORY(user_data)
+        INTF_AVP_OPTIONAL(oc_supported_features)
+        INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+        INTF_AVP_OPTIONAL(route_record)
+)
+
+DIAMETER_INTF(PUA, Profile-Update-Answer, 307, 0, 1, 16777217,
+		INTF_AVP_FIX(session_id)
+		INTF_AVP_OPTIONAL(vendor_specific_application_id)
+		INTF_AVP_OPTIONAL(result_code)
+		INTF_AVP_OPTIONAL(experimental_result)
+		INTF_AVP_MANDANTORY(auth_session_state)
+		INTF_AVP_MANDANTORY(origin_host)
+		INTF_AVP_MANDANTORY(origin_realm)
+		INTF_AVP_OPTIONAL(wildcarded_public_identity)
+		INTF_AVP_OPTIONAL(wildcarded_impu)
+		INTF_AVP_OPTIONAL(data_reference)
+		INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+		INTF_AVP_OPTIONAL(oc_supported_features)
+		INTF_AVP_OPTIONAL(oc_olr)
+		INTF_AVP_LIST_OPTIONAL(load, 0, 0)
+		INTF_AVP_OPTIONAL(failed_avp)
+        INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+        INTF_AVP_OPTIONAL(route_record)
+)
+
+
+DIAMETER_INTF(SNR, Subscribe-Notifications-Request, 308, 1, 1, 16777217,
+        INTF_AVP_FIX(session_id)
+        INTF_AVP_MANDANTORY(vendor_specific_application_id)
+        INTF_AVP_MANDANTORY(auth_session_state)
+        INTF_AVP_MANDANTORY(origin_host)
+        INTF_AVP_MANDANTORY(origin_realm)
+        INTF_AVP_MANDANTORY(destination_host)
+        INTF_AVP_MANDANTORY(destination_realm)
+        INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+        INTF_AVP_MANDANTORY(user_identity)
+        INTF_AVP_OPTIONAL(wildcarded_public_identity)
+        INTF_AVP_OPTIONAL(wildcarded_impu)
+        INTF_AVP_OPTIONAL(service_indication)
+        INTF_AVP_OPTIONAL(send_data_indication)
+        INTF_AVP_MANDANTORY(subs_req_type)
+        INTF_AVP_MANDANTORY(data_reference)
+        INTF_AVP_OPTIONAL(one_time_notification)
+        INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+        INTF_AVP_OPTIONAL(route_record)
+)
+
+DIAMETER_INTF(SNA, Subscribe-Notifications-Answer, 308, 0, 1, 16777217,
+        INTF_AVP_FIX(session_id)
+        INTF_AVP_MANDANTORY(vendor_specific_application_id)
+        INTF_AVP_OPTIONAL(result_code)
+        INTF_AVP_OPTIONAL(experimental_result)
+        INTF_AVP_MANDANTORY(auth_session_state)
+        INTF_AVP_MANDANTORY(origin_host)
+        INTF_AVP_MANDANTORY(origin_realm)
+        INTF_AVP_OPTIONAL(wildcarded_public_identity)
+        INTF_AVP_OPTIONAL(wildcarded_impu)
+        INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+        INTF_AVP_OPTIONAL(user_data)
+        INTF_AVP_OPTIONAL(failed_avp)
+        INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+        INTF_AVP_OPTIONAL(route_record)
+)
+
+DIAMETER_INTF(PNR, Push-Notification-Request, 309, 1, 1, 16777217,
+        INTF_AVP_FIX(session_id)
+        INTF_AVP_MANDANTORY(vendor_specific_application_id)
+        INTF_AVP_MANDANTORY(auth_session_state)
+        INTF_AVP_MANDANTORY(origin_host)
+        INTF_AVP_MANDANTORY(origin_realm)
+        INTF_AVP_MANDANTORY(destination_host)
+        INTF_AVP_MANDANTORY(destination_realm)
+        INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+        INTF_AVP_MANDANTORY(user_identity)
+        INTF_AVP_OPTIONAL(wildcarded_public_identity)
+        INTF_AVP_OPTIONAL(wildcarded_impu)
+        INTF_AVP_OPTIONAL(user_name)
+        INTF_AVP_MANDANTORY(user_data)
+        INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+        INTF_AVP_OPTIONAL(route_record)
+)
+
+DIAMETER_INTF(PNA, Push-Notification-Answer, 309, 0, 1, 16777217,
+        INTF_AVP_FIX(session_id)
+        INTF_AVP_MANDANTORY(vendor_specific_application_id)
+        INTF_AVP_OPTIONAL(result_code)
+        INTF_AVP_OPTIONAL(experimental_result)
+        INTF_AVP_MANDANTORY(auth_session_state)
+        INTF_AVP_MANDANTORY(origin_host)
+        INTF_AVP_MANDANTORY(origin_realm)
+        INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+        INTF_AVP_OPTIONAL(failed_avp)
+        INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+        INTF_AVP_OPTIONAL(route_record)
+)
+
+DIAMETER_INTF(UDR, User-Data-Request, 306, 1, 1, 16777217,
+        INTF_AVP_FIX(session_id)
+        INTF_AVP_MANDANTORY(vendor_specific_application_id)
+        INTF_AVP_MANDANTORY(auth_session_state)
+        INTF_AVP_MANDANTORY(origin_host)
+        INTF_AVP_MANDANTORY(origin_realm)
+        INTF_AVP_MANDANTORY(destination_host)
+        INTF_AVP_MANDANTORY(destination_realm)
+        INTF_AVP_MANDANTORY(user_identity)
+        INTF_AVP_OPTIONAL(wildcarded_public_identity)
+        INTF_AVP_OPTIONAL(wildcarded_impu)
+		INTF_AVP_OPTIONAL(server_name)
+        INTF_AVP_OPTIONAL(service_indication)
+        INTF_AVP_MANDANTORY(data_reference)
+        INTF_AVP_OPTIONAL(identity_set)
+        INTF_AVP_OPTIONAL(requested_domain)
+        INTF_AVP_OPTIONAL(current_location)
+        INTF_AVP_OPTIONAL(dsai_tag)
+		INTF_AVP_OPTIONAL(user_name)
+		INTF_AVP_OPTIONAL(requested_nodes)
+		INTF_AVP_OPTIONAL(serving_node_indication)
+		INTF_AVP_OPTIONAL(pre_paging_supported)
+		INTF_AVP_OPTIONAL(local_time_zone_indication)
+		INTF_AVP_OPTIONAL(udr_flags)
+		INTF_AVP_OPTIONAL(call_reference_info)
+		INTF_AVP_OPTIONAL(oc_supported_features)
+        INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+        INTF_AVP_OPTIONAL(route_record)
+)
+
+DIAMETER_INTF(UDA, User-Data-Answer, 306, 0, 1, 16777217,
+        INTF_AVP_FIX(session_id)
+        INTF_AVP_MANDANTORY(vendor_specific_application_id)
+        INTF_AVP_OPTIONAL(result_code)
+        INTF_AVP_OPTIONAL(experimental_result)
+        INTF_AVP_MANDANTORY(auth_session_state)
+        INTF_AVP_MANDANTORY(origin_host)
+        INTF_AVP_MANDANTORY(origin_realm)
+        INTF_AVP_LIST_OPTIONAL(supported_features, 0, 0)
+        INTF_AVP_OPTIONAL(wildcarded_public_identity)
+        INTF_AVP_OPTIONAL(wildcarded_impu)
+        INTF_AVP_OPTIONAL(user_data)
+		INTF_AVP_OPTIONAL(oc_supported_features)
+		INTF_AVP_OPTIONAL(oc_olr)
+		INTF_AVP_LIST_OPTIONAL(load, 0, 0)
+        INTF_AVP_OPTIONAL(failed_avp)
+        INTF_AVP_LIST_OPTIONAL(proxy_info, 0, 0)
+        INTF_AVP_OPTIONAL(route_record)
+)
+
+#undef AVP_DEF
+#undef AVP_ENUM_TYPE
+#undef AVP_GROUP_OPTIONAL
+#undef AVP_GROUP_MANDANTORY
+#undef AVP_GROUP_LIST_OPTIONAL
+#undef AVP_GROUP_LIST_MANDANTORY
+#undef INTF_AVP_FIX
+#undef INTF_AVP_OPTIONAL 
+#undef INTF_AVP_MANDANTORY
+#undef INTF_AVP_LIST_OPTIONAL
+#undef INTF_AVP_LIST_MANDANTORY
+#undef DIAMETER_INTF
