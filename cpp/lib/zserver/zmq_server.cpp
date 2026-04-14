@@ -22,13 +22,35 @@ zmq_server::zmq_server(ThreadSafeQueue<nums::Packet>& outq,
 zmq_server::~zmq_server()
 { stop(); }
 
-void zmq_server::stop()
+void zmq_server::start()
 {
-    zmq_cli_thread_.request_stop(); //ZMQ->NUMS
+    spdlog::info("ZMQ Server up.");
+
+    sock_.set(zmq::sockopt::linger, 0);
+    sock_.set(zmq::sockopt::rcvhwm, 30000);
+    sock_.set(zmq::sockopt::rcvtimeo, 100); //recv 최대 100ms blocking
+
+    monitor_.init(sock_, "inproc://zmqsvr-monitor");
+    sock_.bind("tcp://*:9984");
+
+    mon_th_ = std::jthread([this](std::stop_token st) {
+        while (!st.stop_requested()) {
+            (void)monitor_.check_event(100);
+        }
+    });
+    zmq_cli_thread_ = std::jthread([this](std::stop_token st) {
+        zmq_cli_monitor(st);
+    });
+}
+
+void zmq_server::stop()
+{ //소멸 순서
+    zmq_cli_thread_.request_stop();
     mon_th_.request_stop();
 }
 
-void zmq_server::zmq_cli_monitor(std::stop_token st) { //zmq_client -> NUMS // type 1,3 처리
+void zmq_server::zmq_cli_monitor(std::stop_token st) {
+    //현재 : recv : send = 1:1
     while (!st.stop_requested()) {
         zmq::message_t msg;
         auto ok = sock_.recv(msg, zmq::recv_flags::none); //블로킹
@@ -44,12 +66,10 @@ void zmq_server::zmq_cli_monitor(std::stop_token st) { //zmq_client -> NUMS // t
                 static_cast<const std::byte*>(msg.data()),
                 msg.size()
             );
-            outq_.push_noti(std::move(p));
-            //다음 recv 전에 send 필요 (REQ REP 모델)
-            //inq blocking pop
-            auto reply = inq_.pop_wait(st);
+            outq_.push_noti(std::move(p)); 
+            
+            auto reply = inq_.pop_wait_for(st);
             if (reply) {
-                //reply(nums::Packet형)데이터 json만들어서 응답
                 auto j = reply->to_json();
                 std::string payload = j.dump();
 
@@ -57,15 +77,6 @@ void zmq_server::zmq_cli_monitor(std::stop_token st) { //zmq_client -> NUMS // t
                 std::memcpy(msg.data(), payload.data(), payload.size());
 
                 sock_.send(msg, zmq::send_flags::none);
-                /*
-                const auto size = reply->total_size();
-                zmq::message_t msg(size);
-                reply->serialize(
-                    static_cast<std::byte*>(msg.data()),
-                    size
-                );
-                sock_.send(msg, zmq::send_flags::none);
-                */
             }
         } catch (const std::exception& e) {
             spdlog::error("parse failed: {}", e.what());
@@ -73,27 +84,6 @@ void zmq_server::zmq_cli_monitor(std::stop_token st) { //zmq_client -> NUMS // t
     }
 }
 
-void zmq_server::start() // NUMS
-{
-    spdlog::info("zmq server start");
-
-    sock_.set(zmq::sockopt::linger, 0);
-    sock_.set(zmq::sockopt::rcvhwm, 30000);
-    sock_.set(zmq::sockopt::rcvtimeo, 100); //recv 최대 100ms blocking
-
-    monitor_.init(sock_, "inproc://zmqsvr-monitor");
-    sock_.bind("tcp://*:9984");
-
-    mon_th_ = std::jthread([this](std::stop_token st) {
-        while (!st.stop_requested()) {
-            (void)monitor_.check_event(100);
-        }
-    });
-    
-    zmq_cli_thread_ = std::jthread([this](std::stop_token st) {
-        zmq_cli_monitor(st);
-    });
-}
 
 
 
@@ -102,7 +92,19 @@ void zmq_server::start() // NUMS
 
 
 
+//여기서 한번씩 socket read? 양방향 health check를 위해서?
+//다음 recv 전에 send 필요 (REQ REP 모델)
+//inq blocking pop
 
+/*
+const auto size = reply->total_size();
+zmq::message_t msg(size);
+reply->serialize(
+    static_cast<std::byte*>(msg.data()),
+    size
+);
+sock_.send(msg, zmq::send_flags::none);
+*/
 
 /* outq_ MONITORING (main 함수에 있던 녀석)
 std::thread t_outq_([&] { // MONITOR(outq_)

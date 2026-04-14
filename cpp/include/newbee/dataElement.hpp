@@ -4,7 +4,7 @@
 #include <cstddef>
 #include "nums_constants.hpp"
 #include <nlohmann/json.hpp>
-
+#include <atomic>
 
 namespace nums {
     class Header { //mandatory
@@ -15,6 +15,7 @@ namespace nums {
             std::array<char, 13> seq_num; //규격서 변경됨(12->13)
         public:
             std::array<char, 3> get_msg_type() const;
+            size_t get_msg_len() const;
             std::string toString() const;
             std::string bodyToString() const;
             MsgType msg_type_enum() const;
@@ -26,6 +27,12 @@ namespace nums {
             void deserialize(const std::byte* in);
             static Header parse_json(const std::byte* in, std::size_t n); //zmq_client 로부터 오는 JSON parsing -> header 생성
             static Header parse(const std::byte* in, std::size_t n);//smsc 로부터 오는 raw bytes parsing용
+
+            //seq num 증가하도록 설계
+            static std::atomic<uint64_t> seq;
+            std::string next_seq();
+            void set_seq_num(const std::string& seq);
+
     };
     class sn_reginfo_body {
         private:

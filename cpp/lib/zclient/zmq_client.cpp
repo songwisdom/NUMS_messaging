@@ -14,7 +14,7 @@ void zmq_client::stop()
 {
     stop_.store(true);
 
-    // monitor thread 0m~E0m~L
+    // monitor thread
     if (mon_th_.joinable()) {
         mon_th_.join();
     }
@@ -117,7 +117,7 @@ std::cout << "s_time: YYYYMMDDHH -> ";
 void zmq_client::start(int idx)
 {
     spdlog::info("zmq client start");
-    monitor_.init(sock_, fmt::format("inproc://zmqcli-monitor-{}",idx));
+    monitor_.init(sock_, fmt::format("inproc://zmqcli-monitor-{}",idx)); //프로세스 간 통신을 위해서는 inproc->ipc, 네트워크 간: tcp
 
     mon_th_ = std::thread([this] {
         while (!stop_.load()) {

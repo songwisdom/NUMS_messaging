@@ -11,6 +11,7 @@
 #include "dataElement.hpp"
 //JSON Parsing
 #include <nlohmann/json.hpp>
+#include <atomic>
 
 namespace nums {
     Header::Header(){ 
@@ -22,6 +23,10 @@ namespace nums {
 
     std::array<char, 3> Header::get_msg_type() const{
         return msg_type;
+    }
+    size_t Header::get_msg_len() const{
+        std::string len(msg_len.data(), msg_len.size());
+        return std::stoul(len);
     }
     
     // 밑 함수 - 만약 MsgType 가짓수가 적다면 굳이스럽지 않음?
@@ -41,6 +46,20 @@ namespace nums {
                     std::size_t& offset){
         std::memcpy(dst.data(), in + offset, N);
         offset += N;
+    }
+
+    //seq_num 증가처리
+    std::atomic<uint64_t> Header::seq{1}; //정의
+
+    std::string Header::next_seq() {
+        return std::to_string(seq++);
+    }
+    void Header::set_seq_num(const std::string& seq){
+        std::memcpy(
+            seq_num.data(),
+            seq.data(),
+            std::min(seq.size(), seq_num.size())
+        );
     }
 
     Header Header::parse_json(const std::byte* in, std::size_t n){
@@ -63,7 +82,7 @@ namespace nums {
             std::min(tmp2.size(), h.action_code.size())
         );
 
-        std::string tmp3 = "1";
+        std::string tmp3 = h.next_seq();
         std::memcpy(
             h.seq_num.data(),
             tmp3.data(),

@@ -23,6 +23,24 @@ class ThreadSafeQueue {
             q_.pop();
             return v;
         }
+
+        template<typename Rep, typename Period>
+        std::optional<T> pop_wait_for(
+            std::stop_token st,
+            const std::chrono::duration<Rep, Period>& dur
+        ) {
+            // dur 만큼만 기다림
+            // 큐가 비어도 주기적으로 깨어나서 reconnect 요청 확인 가능
+            std::unique_lock lock(mtx_);
+            cv_.wait_for(lock,st, dur, [&] { return !q_.empty(); });
+
+            if (q_.empty()) return std::nullopt;
+
+            T v = std::move(q_.front());
+            q_.pop();
+            return v;
+        }
+
         void notify_all() { cv_.notify_all(); }
 
     private:

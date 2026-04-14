@@ -23,6 +23,17 @@ namespace nums {
 
         Packet() = default;
 
+        //LINK PACKET 생성자
+        explicit Packet(MsgType t) {
+            if (t == MsgType::LINK) {
+                Header h{};
+                h.set_msg_type(t);
+                h.set_msg_len(t);
+                h.set_seq_num(h.next_seq());
+                header = h;
+            }
+        }
+
         std::string toString() const {
             return "HEADER:" + header.toString() +
                    "\nBODY:" + bodyToString();
@@ -43,7 +54,7 @@ namespace nums {
             return Header::SIZE + body_size();
         }
         
-
+        
         static Packet parse_json(const std::byte* in, std::size_t n)
         { //json으로 들어오는 건 1,3 뿐임
             Packet p;
@@ -66,6 +77,8 @@ namespace nums {
             }
             return p;
         }
+
+        
 
         template <std::size_t N>
         void read_array(std::array<char, N>& dst,
@@ -96,12 +109,11 @@ namespace nums {
             }, body);
         }
 
-        nlohmann::json to_json() const
-        {
+        nlohmann::json to_json() const { // Packet 객체 확인해서 json 생성해주는 함수
             using json = nlohmann::json;
             json j;
             auto mt = header.get_msg_type();
-            j["msg_type"] = std::string(mt.data(), strnlen(mt.data(), mt.size()));
+            j["msg_type"] = std::string(mt.data(), strnlen(mt.data(), mt.size())); 
             if (std::holds_alternative<result_body>(body)) {
                 const auto& b = std::get<result_body>(body);
                 auto rc = b.get_result();
@@ -111,6 +123,7 @@ namespace nums {
             // j["action_code"] = header.action_code; //나중에 getter만들든가 말든가
             // j["seq_num"] = header.seq_num;
         }
+    
     private:
         std::size_t body_size() const {
             return std::visit([](auto&& b) -> std::size_t {
@@ -121,7 +134,6 @@ namespace nums {
                     return T::SIZE;
             }, body);
         }
-
     };
 };
 //packet 만들 때 msg_type 보고 Body 타입부터 정해서 Packet 생성

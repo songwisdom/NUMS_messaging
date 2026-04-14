@@ -29,6 +29,7 @@ bool TcpClient::connect(const std::string& ip, uint16_t port)
     timeval tv{};
     tv.tv_sec = 5;
     tv.tv_usec = 0;
+    // 수신 타임아웃
     setsockopt(fd_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
     return true;
 }
@@ -51,8 +52,7 @@ bool TcpClient::send_all(const std::byte* data, std::size_t len)
 bool TcpClient::read_exact(std::byte* buf, size_t len)
 {
     size_t received = 0;
-    while (received < len)
-    {
+    while (received < len){
         ssize_t n = ::recv(fd_, buf + received, len - received, 0);
         if (n > 0) {
             received += static_cast<size_t>(n);

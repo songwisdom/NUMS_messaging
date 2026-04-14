@@ -29,17 +29,15 @@ int main() {
     logging::log_init("NUMS");
     net::io_context io;
 
-    ThreadSafeQueue<nums::Packet> outq_; // NUMS -> SMSC //type 1,3,(6)
-    ThreadSafeQueue<nums::Packet> inq_; // ZMQ_CLI <- NUMS //type 2,4,5 packet을 JSON화 시켜서 돌려줌
+    ThreadSafeQueue<nums::Packet> outq_;
+    ThreadSafeQueue<nums::Packet> inq_;
 
     zmq_server svr(outq_, inq_);
     svr.start();
 
     numsworker wkr(outq_, inq_);
-    wkr.start();
-
-    //outq_monitor, 사용된 queue 전부 블로킹이라 메시지 없으면 멈춰있음
-    //health chker 스레드 필요
+    wkr.start(); //NUMS
+    // wkr.healthChkstart(); // Health Checker
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1200000));
     svr.stop();
@@ -137,3 +135,7 @@ net::awaitable<void> health_timer(net::io_context& io){
 net::co_spawn(io, health_timer(io), net::detached);
 
 */
+
+
+//사용된 queue.pop(),read_exact 전부 블로킹이라 메시지 없으면 멈춰있음
+//health chker 스레드 필요
