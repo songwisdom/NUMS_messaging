@@ -31,40 +31,56 @@ numsworker::~numsworker(){
 
 void numsworker::stop(){
     outq_thread_.request_stop(); //NUMS->SMSC
+    heartbeat_sender_.request_stop(); //heartbeat_sender_
 }
 
 void numsworker::start(){
     outq_thread_ = std::jthread([this](std::stop_token st) {
         outq_monitor(st);
     });
+    heartbeat_sender_ = std::jthread([this](std::stop_token st) {
+        heartbeat_sender(st);
+    });
+
 }
 
-void numsworker::outq_monitor(std::stop_token st){
-    //zmq client -> sendMsg
+void numsworker::heartbeat_sender(std::stop_token st){
+    //5초 주기
+    //connected_ 상태에 따라 LINK 메시지 outq_.push()
+    using namespace std::chrono_literals;
     while (!st.stop_requested()) {
-        while (!smsc_.connect(serv_host, serv_port)) {
-            spdlog::error("Connect to SMSC failed, retry...");
-            std::this_thread::sleep_for(1s);
+        if(connected_.load()){
+            nums::Packet lnk;
+            lnk = nums::Packet(MsgType::LINK);
+            outq_.push_noti(std::move(lnk)); 
         }
-        spdlog::info("Connected to SMSC.");
-        
-        auto msg_opt = outq_.pop_wait_for(st, 5s);
-        nums::Packet msg;
-        if (!msg_opt.has_value()) { // IDLE 상태면 LINK 생성(주기: 5초)
-            msg = nums::Packet(MsgType::LINK);
-        }else{
-            msg = *msg_opt;
-        }
-        if(sendMsg(msg)){ // 1, 3 send
-            auto result = recvMsg();
-            if(result){ // 2, 5 recv
-                inq_.push_noti(result);
-            }
-        }else{
-            spdlog::error("Connection lost during send");
-            smsc_.close(); // 연결 끊김 처리
-        }
+        std::this_thread::sleep_for(5s);
     }
+}
+
+//outq_ (smsc로 전송) - smsc 연결 재수립
+void numsworker::outq_monitor(std::stop_token st){
+    while (!st.stop_requested()) {
+        if(!connected_.load()){ //connected_ 초기값은 false고, 이에 따라 연결 재수립
+            if(!smsc_.connect(serv_host, serv_port)){
+                spdlog::error("Connect to SMSC failed, retry...");
+                std::this_thread::sleep_for(1s);
+                continue;
+            }
+            connected_.store(true);
+            spdlog::info("Connected to SMSC.");
+        }
+        //메시지 send
+        auto msg_opt = outq_.pop_wait(st); //notify 기반 blocking 대기 ㅇㅇ
+        if (!msg_opt) continue;
+        async_send(*msg_opt); //async_send는 async_write와 동시에 retry_map put(이 이후로직은 추후 생각)
+    }
+}
+
+void async_send(){ //retry_map에 넣는 로직도 같이
+    //sendMsg() 호출
+    //sendMsg() 성공 시 retry_map에 try_cnt=0, seq_num, send_time 기록
+    
 }
 
 

@@ -15,6 +15,7 @@ namespace nums {
 
     class Packet {
     public:
+        zmq::message_t identity_;
         Header header;
         Body body{
             std::monostate{}
@@ -123,7 +124,18 @@ namespace nums {
             // j["action_code"] = header.action_code; //나중에 getter만들든가 말든가
             // j["seq_num"] = header.seq_num;
         }
-    
+        
+        
+        //ZMQ Dealer/router type으로의 전환에 따른 identity 저장용 함수
+        void set_identity(zmq::message_t id_msg) { // const & ??
+            identity_ = std::move(id_msg);
+        }
+        const zmq::message_t& get_identity() const {
+            //매번 복사해서 반환 x, 참조로 반환
+            return identity_;
+        }
+        
+
     private:
         std::size_t body_size() const {
             return std::visit([](auto&& b) -> std::size_t {

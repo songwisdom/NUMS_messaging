@@ -38,7 +38,7 @@ bool init(int argc, char **argv) {
 
 int main(int argc, char **argv) {
     init(argc, argv);
-    constexpr int CLIENT_COUNT = 1;
+    constexpr int CLIENT_COUNT = 1; 
 
     std::vector<std::unique_ptr<zmq_client>> clients;
     std::vector<std::thread> threads;

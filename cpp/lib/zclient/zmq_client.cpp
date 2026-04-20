@@ -116,7 +116,7 @@ std::cout << "s_time: YYYYMMDDHH -> ";
 
 void zmq_client::start(int idx)
 {
-    spdlog::info("zmq client start");
+    spdlog::info("zmq client start(send)");
     monitor_.init(sock_, fmt::format("inproc://zmqcli-monitor-{}",idx)); //프로세스 간 통신을 위해서는 inproc->ipc, 네트워크 간: tcp
 
     mon_th_ = std::thread([this] {
@@ -139,7 +139,7 @@ void zmq_client::start(int idx)
 
         std::cout << "msg : " << s.GetString() << std::endl;
         const auto ret = sock_.send(zmq::buffer(s.GetString(),s.GetSize()), zmq::send_flags::none);
-        
+
         if (!ret) {
             const int err = zmq_errno();
             spdlog::error("[{}:{}] send failed: errno={} ({}) buf[{}]",__func__, __LINE__, err, zmq_strerror(err), s.GetString());
@@ -148,13 +148,18 @@ void zmq_client::start(int idx)
         }
 
         zmq::message_t reply;
-        const auto rc = sock_.recv(reply, zmq::recv_flags::none); //블로킹!!! 계속 기다리는 recv아냐? 논블로킹은 epoll (2026-02-22)
+        const auto rc = sock_.recv(reply, zmq::recv_flags::none); //
         if(!rc){
             std::cout << "recv fail " << std::endl;
         }
 
         std::string reply_msg(static_cast<char*>(reply.data()), reply.size());
         std::cout << "recv:" << reply_msg << std::endl;
+
     }
-    spdlog::info("zmq client stop");
+    spdlog::info("zmq client sender stop");
 }
+
+
+
+

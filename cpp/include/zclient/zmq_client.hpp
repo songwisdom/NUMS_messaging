@@ -22,7 +22,7 @@ private:
     std::atomic<bool> stop_{false};
 
     zmq::context_t ctx_{1};
-    zmq::socket_t  sock_{ctx_, zmq::socket_type::req};
+    zmq::socket_t  sock_{ctx_, zmq::socket_type::dealer}; //req -> dealer
 
     plk_monitor_t monitor_;
     std::thread   mon_th_;

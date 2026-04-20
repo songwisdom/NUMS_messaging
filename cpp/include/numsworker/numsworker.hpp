@@ -22,10 +22,14 @@ class numsworker
 
     private:
         std::jthread outq_thread_;
+        std::jthread heartbeat_sender_;
+        std::atomic<bool> connected_{false};
+
         ThreadSafeQueue<nums::Packet>& outq_; // NUMS -> SMSC
         ThreadSafeQueue<nums::Packet>& inq_; // NUMS -> ZMQ Client
         void outq_monitor(std::stop_token st); // smsc로 req
         void inq_monitor(std::stop_token st); // zmq client로 res
+        void numsworker::heartbeat_sender(std::stop_token st); //heartbeat_sender
 
         bool sendMsg(std::optional<nums::Packet> msg);
         bool send_all(int fd, const std::byte* data, size_t len);

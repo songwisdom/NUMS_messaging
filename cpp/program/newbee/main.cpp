@@ -33,11 +33,10 @@ int main() {
     ThreadSafeQueue<nums::Packet> inq_;
 
     zmq_server svr(outq_, inq_);
-    svr.start();
+    svr.start(); //ZMQ Server
 
     numsworker wkr(outq_, inq_);
     wkr.start(); //NUMS
-    // wkr.healthChkstart(); // Health Checker
 
     std::this_thread::sleep_for(std::chrono::milliseconds(1200000));
     svr.stop();

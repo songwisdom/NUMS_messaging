@@ -38,48 +38,58 @@ void zmq_server::start()
             (void)monitor_.check_event(100);
         }
     });
-    zmq_cli_thread_ = std::jthread([this](std::stop_token st) {
-        zmq_cli_monitor(st);
+    in_handler_th_ = std::jthread([this](std::stop_token st) {
+        in_handler(st);
+    });
+
+    out_handler_th_ = std::jthread([this](std::stop_token st) {
+        out_handler(st);
     });
 }
 
 void zmq_server::stop()
 { //소멸 순서
-    zmq_cli_thread_.request_stop();
+    out_handler_th_.request_stop();
+    in_handler_th_.request_stop();
     mon_th_.request_stop();
 }
 
-void zmq_server::zmq_cli_monitor(std::stop_token st) {
-    //현재 : recv : send = 1:1
+void zmq_server::in_handler(std::stop_token st) {
+    // ZMQ 소켓 event 감지(poll) -> NUMS
     while (!st.stop_requested()) {
-        zmq::message_t msg;
-        auto ok = sock_.recv(msg, zmq::recv_flags::none); //블로킹
-        if (!ok) {
-            continue; // timeout 포함
-        }
-        spdlog::info("recv bytes={}, buf=[{}]",
-                msg.size(),
-                std::string_view(static_cast<const char*>(msg.data()), msg.size())
-        );
-        try{
-            auto p = nums::Packet::parse_json(
-                static_cast<const std::byte*>(msg.data()),
-                msg.size()
-            );
-            outq_.push_noti(std::move(p)); 
-            
-            auto reply = inq_.pop_wait_for(st);
-            if (reply) {
-                auto j = reply->to_json();
-                std::string payload = j.dump();
+        // zmq::pollitem_t items[] = {
+        //     { static_cast<void*>(sock_), 0, ZMQ_POLLIN, 0 }
+        // };
+        // zmq::poll(items, 1, 100); // (socket 1개, 100ms wake&loop)
+        // if (items[0].revents & ZMQ_POLLIN) {
+            std::vector<zmq::message_t> recv_frames;
+            do{
+                zmq::message_t msg;
+                sock_.recv(msg, zmq::recv_flags::none); //blocking인데 poll이후라 any recv_flags
+                recv_frames.push_back(std::move(msg)); 
+            } while (sock_.get(zmq::sockopt::rcvmore));
 
-                zmq::message_t msg(payload.size());
-                std::memcpy(msg.data(), payload.data(), payload.size());
-
-                sock_.send(msg, zmq::send_flags::none);
+            if (!recv_frames.empty()){
+                auto& payload_msg = recv_frames.back();
+                auto p = nums::Packet::parse_json(
+                    static_cast<const std::byte*>(payload_msg.data()),
+                    payload_msg.size()
+                );
+                p.set_identity(std::move(recv_frames[0])); 
+                outq_.push_noti(std::move(p)); 
             }
-        } catch (const std::exception& e) {
-            spdlog::error("parse failed: {}", e.what());
+        // }
+        //ROUTER
+        while(auto reply = inq_.try_pop(st)){ //try_pop (없으면 계속 null 반환) > notify 기반 blocking pop(O)
+            auto j = reply->to_json();
+            std::string payload = j.dump();
+
+            sock_.send(reply->get_identity(), zmq::send_flags::sndmore);
+            sock_.send(zmq::message_t(0), zmq::send_flags::sndmore);
+
+            zmq::message_t msg(payload.size());
+            std::memcpy(msg.data(), payload.data(), payload.size());
+            sock_.send(msg, zmq::send_flags::none);
         }
     }
 }
@@ -88,9 +98,14 @@ void zmq_server::zmq_cli_monitor(std::stop_token st) {
 
 
 
+// 하나의 ZMQ socket은 하나의 스레드에서만 사용 -이유: zmq 소켓은 thread-safe 하지 않음
+// 여러 스레드에서 동시에 접근 x(데이터 레이스, 메시지 손실, UB..)
+// 따라서 각 소켓은 단일 스레드에서만 사용해야 함. 
+// 그럼 소켓 여러개 쓰는 경우는 뭐지?
 
+//identity 저장-[0]:주소, [1]:empty delimeter, back():payload(JSON)
 
-
+//========================밑부터는 REQ/REP, 동기 야매논블로킹========================
 
 //여기서 한번씩 socket read? 양방향 health check를 위해서?
 //다음 recv 전에 send 필요 (REQ REP 모델)

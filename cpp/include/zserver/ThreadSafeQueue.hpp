@@ -13,10 +13,10 @@ class ThreadSafeQueue {
             cv_.notify_one();
         }
 
+        //notify 기반 blocking pop
         std::optional<T> pop_wait(std::stop_token st) { 
-            // blocking - while 안에서 돌려도 spin X
             std::unique_lock lock(mtx_);
-            cv_.wait(lock, st, [&]{ return !q_.empty(); }); //stop_token 지원
+            cv_.wait(lock, st, [&]{ return !q_.empty(); });
             if(q_.empty()) return std::nullopt;
 
             T v = std::move(q_.front());
@@ -24,6 +24,20 @@ class ThreadSafeQueue {
             return v;
         }
 
+        //non-blocking pop
+        std::optional<T> try_pop() {
+            std::lock_guard lock(mtx_); // 아주 짧은 시간 락
+            if (q_.empty()) {
+                return std::nullopt; // 즉시 nullopt 반환
+            }
+            T v = std::move(q_.front());
+            q_.pop();
+            return v;
+        }
+
+        void notify_all() { cv_.notify_all(); }
+
+        //동기구조에서 사용했던 일정시간동안 blocking 되는 pop
         template<typename Rep, typename Period>
         std::optional<T> pop_wait_for(
             std::stop_token st,
@@ -40,8 +54,6 @@ class ThreadSafeQueue {
             q_.pop();
             return v;
         }
-
-        void notify_all() { cv_.notify_all(); }
 
     private:
         std::queue<T> q_;
