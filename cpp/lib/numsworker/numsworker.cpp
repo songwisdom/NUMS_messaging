@@ -47,7 +47,14 @@ void numsworker::outq_monitor(std::stop_token st){
             std::this_thread::sleep_for(1s);
         }
         spdlog::info("Connected to SMSC.");
-        
+
+        // recv 한번 하는 이유 :
+        // 연결 수립 시 SMSC에서 LINK 메시지 보내는 경우 있어서?
+        auto result = recvMsg();
+        if(result){
+            spdlog::info("Initial LINK received after connect.{}\n", result->toString());
+        }
+
         auto msg_opt = outq_.pop_wait_for(st, 5s);
         nums::Packet msg;
         if (!msg_opt.has_value()) { // IDLE 상태면 LINK 생성(주기: 5초)
@@ -82,47 +89,47 @@ bool numsworker::sendMsg(const nums::Packet& msg){
 }
 
 //seq 오류처리. 내가 보낸 메시지에 대한 옳지 못한 응답에 대한 오류처리
-std::optional<nums::Packet> numsworker::recvMsg(){
-    auto rep_h = recvHeader();
-    if (!rep_h) return std::nullopt;
-    switch(rep_h.msg_type_enum()){
-        case MsgType::LINK:
-            nums::Packet ack(MsgType::LINK_ACK);
-            sendMsg(ack);
-            spdlog::info("LINK received, sending ACK");
-            return std::nullopt;
-        case MsgType::LINK_ACK:
-            nums::Packet result{};
-            result.header = *rep_h;
-            spdlog::info("LINK ACK received.\n", result.toString());
-            return result;
-        case MsgType::SN_REGINFO_ACK:
-            auto rep_b = recvBody(*rep_h);
-            auto next_h = recvHeader(); // 1 or 5 recv
-            if (!next_h) return std::nullopt;
-            if((*next_h).msg_type_enum() == MsgType::LINK){
-                nums::Packet ack(MsgType::LINK_ACK);
-                sendMsg(ack);
-                spdlog::info("LINK received, sending ACK");
-                return std::nullopt;
-            }else if((*next_h).msg_type_enum() == MsgType::REQ_RESULT){
-                auto next_b = recvBody(*next_h);
-                if (!next_b) return std::nullopt;
-
-                nums::Packet ack(MsgType::REQ_RESULT_ACK);
-                sendMsg(ack);
-
-                nums::Packet result{};
-                result.header = *next_h;
-                result.body = *next_b;
-                spdlog::info("report arrived.");
-                return result;
-            }else{
-                return std::nullopt;
-            }
-            break;
-        default:
-            return std::nullopt;
+std::optional<nums::Packet> numsworker::recvMsg() {
+    while(true){
+        auto rep_h = recvHeader();
+        if (!rep_h) return std::nullopt;
+        switch(rep_h.msg_type_enum()){
+            case MsgType::LINK:
+                {
+                    nums::Packet ack(MsgType::LINK_ACK);
+                    sendMsg(ack);
+                    spdlog::info("LINK received, sending ACK");
+                    break;
+                }
+            case MsgType::LINK_ACK:
+                // (내가 보낸 메시지에 대한 응답 오기전에 ACK가 오는 케이스가 없다고 가정)
+                {
+                    nums::Packet result{};
+                    result.header = *rep_h;
+                    spdlog::info("LINK ACK received.\n");
+                    return result;
+                }
+            case MsgType::SN_REGINFO_ACK:
+                {
+                    auto rep_b = recvBody(*rep_h);
+                    if (!rep_b) return std::nullopt; //실패 시 return
+                    break;
+                }
+            case MsgType::REQ_RESULT:
+                {
+                    auto rep_b = recvBody(*rep_h);
+                    if (!rep_b) return std::nullopt;
+                    nums::Packet result{};
+                    result.header = *rep_h;
+                    result.body = *rep_b;
+                    spdlog::info("report arrived.");
+                    nums::Packet ack(MsgType::REQ_RESULT_ACK);
+                    sendMsg(ack);
+                    return result;
+                }
+            default:
+                {return std::nullopt;}
+        }
     }
 }
 
@@ -332,7 +339,6 @@ bool numsworker::send_and_recv(std::optional<nums::Packet> msg) {
 // NUMS->SMSC (1,3) NUMS<-SMSC(2,4,5), NUMS->SMSC(6)
 
 //내가 기대하는 응답/이벤트를 하나 처리할 때까지 돈다
-
 
 //numsworker 객체의 멤버를 사용하려면 앞에 '객체::'를 붙여야하는구나
 
