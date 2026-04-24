@@ -5,6 +5,8 @@
 #include <ctime>
 #include <iostream>
 #include <nlohmann/json.hpp>
+#include "nums_constants.hpp"
+
 
 namespace nums {
     using Body = std::variant<
@@ -117,11 +119,36 @@ namespace nums {
             if (std::holds_alternative<result_body>(body)) {
                 const auto& b = std::get<result_body>(body);
                 auto rc = b.get_result();
-                j["result_code"] = std::string(rc.data(), strnlen(rc.data(), rc.size()));
+
+                std::string codeStr(rc.data(),strnlen(rc.data(), rc.size()));
+                int code =std::stoi(codeStr); //이거랑 바로 윗줄 의미:
+                //  result_code는 숫자지만 json에서는 문자열로 표현하기 위해서. 
+                // 숫자 그대로 표현하려면 codeStr 대신 code 써도 됨
+
+                j["result_code"] = codeStr;
+                j["result_desc"] = result_desc(code); // Assuming the first character of result code represents the result type
+
             }
             return j;
             // j["action_code"] = header.action_code; //나중에 getter만들든가 말든가
             // j["seq_num"] = header.seq_num;
+        }
+        std::string_view result_desc(int code)
+        {
+            switch(static_cast<RsltType>(code)) {
+                case RsltType::OK: return "성공";
+                case RsltType::SYSFAIL: return "시스템 실패";
+                case RsltType::FORMAT_ERR: return "포맷 오류";
+                case RsltType::ETC: return "기타 오류";
+                case RsltType::INVALID_BODYLEN: return "잘못된 Body 길이";
+                case RsltType::INVALID_CID: return "잘못된 CID";
+                case RsltType::DUP_CIDNO: return "중복 CIDNO";
+                case RsltType::DUPINSERT: return "중복 등록";
+                case RsltType::DUPDELETE: return "중복 삭제";
+                case RsltType::NOTROW: return "조건에 해당하는 Row 없음";
+                case RsltType::INVALID_ACTION: return "잘못된 Action";
+                default: return "UNKNOWN";
+            }
         }
     
     private:

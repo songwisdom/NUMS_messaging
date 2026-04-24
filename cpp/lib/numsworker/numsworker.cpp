@@ -128,7 +128,13 @@ std::optional<nums::Packet> numsworker::recvMsg() {
                     return result;
                 }
             default:
-                {return std::nullopt;}
+                {
+                    spdlog::error("Unknown message type received.");
+                    nums::Packet result{};
+                    result.header = *rep_h;
+                    result.body = {};
+                    return result;
+                }
         }
     }
 }
