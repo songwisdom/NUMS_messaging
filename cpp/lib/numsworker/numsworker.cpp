@@ -40,6 +40,7 @@ void numsworker::start(){
 }
 
 void numsworker::outq_monitor(std::stop_token st){
+    using namespace std::chrono_literals;
     //zmq client -> sendMsg
     while (!st.stop_requested()) {
         while (!smsc_.connect(serv_host, serv_port)) {
@@ -51,7 +52,7 @@ void numsworker::outq_monitor(std::stop_token st){
         // recv 한번 하는 이유 :
         // 연결 수립 시 SMSC에서 LINK 메시지 보내는 경우 있어서?
         auto result = recvMsg();
-        if(result){
+        if(result.has_value()){
             spdlog::info("Initial LINK received after connect.{}\n", result->toString());
         }
 
@@ -59,13 +60,13 @@ void numsworker::outq_monitor(std::stop_token st){
         nums::Packet msg;
         if (!msg_opt.has_value()) { // IDLE 상태면 LINK 생성(주기: 5초)
             msg = nums::Packet(MsgType::LINK);
-        }else{
+        } else{
             msg = *msg_opt;
         }
         if(sendMsg(msg)){ // 1, 3 send
             auto result = recvMsg();
-            if(result){ // 2, 5 recv
-                inq_.push_noti(result);
+            if(result.has_value()){ // 2, 5 recv
+                inq_.push_noti(*result);
             }
         }else{
             spdlog::error("Connection lost during send");
@@ -75,9 +76,9 @@ void numsworker::outq_monitor(std::stop_token st){
 }
 
 
-bool numsworker::sendMsg(const nums::Packet& msg){
+bool numsworker::sendMsg(const nums::Packet& msg){ //재전송 고려?
     std::vector<std::byte> out(msg.total_size());
-    msg->serialize(out.data(), out.size()); 
+    msg.serialize(out.data(), out.size()); //->와 . : 포인터->멤버 접근, 객체->멤버 접근
     if (!smsc_.send_all(out.data(), out.size())) { // 1 or 3 전송
         spdlog::error("msg send failed.");
         return false;
@@ -93,11 +94,17 @@ std::optional<nums::Packet> numsworker::recvMsg() {
     while(true){
         auto rep_h = recvHeader();
         if (!rep_h) return std::nullopt;
-        switch(rep_h.msg_type_enum()){
+        switch((*rep_h).msg_type_enum()){
+             //‘class std::optional<nums::Header>’ has no member named ‘msg_type_enum’
+            //윗줄 오류 원인: optional 객체에서 Header 객체 꺼내는 과정 필요.
+            // *rep_h.msg_type_enum()
+            // (*rep_h).msg_type_enum() 또는 rep_h->msg_type_enum()
             case MsgType::LINK:
                 {
                     nums::Packet ack(MsgType::LINK_ACK);
-                    sendMsg(ack);
+                    if(!sendMsg(ack)){
+                        //재전송까지 실패했을 경우
+                    }
                     spdlog::info("LINK received, sending ACK");
                     break;
                 }

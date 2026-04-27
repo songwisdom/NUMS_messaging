@@ -50,6 +50,7 @@ void zmq_server::stop()
 }
 
 void zmq_server::zmq_cli_monitor(std::stop_token st) {
+    using namespace std::chrono_literals;
     //현재 : recv : send = 1:1
     while (!st.stop_requested()) {
         zmq::message_t msg;
@@ -68,7 +69,7 @@ void zmq_server::zmq_cli_monitor(std::stop_token st) {
             );
             outq_.push_noti(std::move(p)); 
             
-            auto reply = inq_.pop_wait_for(st);
+            auto reply = inq_.pop_wait_for(st,1s); // non-blocking
             if (reply) {
                 auto j = reply->to_json();
                 std::string payload = j.dump();

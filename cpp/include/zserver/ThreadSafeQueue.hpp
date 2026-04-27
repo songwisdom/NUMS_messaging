@@ -13,8 +13,8 @@ class ThreadSafeQueue {
             cv_.notify_one();
         }
 
-        std::optional<T> pop_wait(std::stop_token st) { 
-            // blocking - while 안에서 돌려도 spin X
+        // blocking - while 안에서 돌려도 spin X
+        std::optional<T> pop_wait(std::stop_token st) {
             std::unique_lock lock(mtx_);
             cv_.wait(lock, st, [&]{ return !q_.empty(); }); //stop_token 지원
             if(q_.empty()) return std::nullopt;

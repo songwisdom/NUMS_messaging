@@ -27,7 +27,6 @@ namespace net = boost::asio;
 
 int main() {
     logging::log_init("NUMS");
-    net::io_context io;
 
     ThreadSafeQueue<nums::Packet> outq_;
     ThreadSafeQueue<nums::Packet> inq_;
@@ -42,7 +41,6 @@ int main() {
     svr.stop();
     wkr.stop();
 
-    io.run();
     return 0;
 }
 

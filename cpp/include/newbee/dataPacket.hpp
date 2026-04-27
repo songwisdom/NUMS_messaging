@@ -121,7 +121,7 @@ namespace nums {
                 auto rc = b.get_result();
 
                 std::string codeStr(rc.data(),strnlen(rc.data(), rc.size()));
-                int code =std::stoi(codeStr); //이거랑 바로 윗줄 의미:
+                int code = std::stoi(codeStr); //문자열->int 변환
                 //  result_code는 숫자지만 json에서는 문자열로 표현하기 위해서. 
                 // 숫자 그대로 표현하려면 codeStr 대신 code 써도 됨
 
@@ -133,8 +133,7 @@ namespace nums {
             // j["action_code"] = header.action_code; //나중에 getter만들든가 말든가
             // j["seq_num"] = header.seq_num;
         }
-        std::string_view result_desc(int code)
-        {
+        static std::string_view result_desc(int code) {
             switch(static_cast<RsltType>(code)) {
                 case RsltType::OK: return "성공";
                 case RsltType::SYSFAIL: return "시스템 실패";

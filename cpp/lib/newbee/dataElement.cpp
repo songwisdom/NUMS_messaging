@@ -136,7 +136,8 @@ namespace nums {
         );
     }
     
-    void Header::serialize(std::byte* out) const {
+    void Header::serialize(std::byte* out) const { 
+        //const: 객체 변경 하지 않겠다
         std::size_t offset = 0;
         std::memcpy(out + offset, msg_type.data(), msg_type.size());
         offset += msg_type.size();
