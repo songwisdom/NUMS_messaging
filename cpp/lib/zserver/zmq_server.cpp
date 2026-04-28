@@ -22,17 +22,19 @@ zmq_server::zmq_server(ThreadSafeQueue<nums::Packet>& outq,
 zmq_server::~zmq_server()
 { stop(); }
 
-void zmq_server::start()
+void zmq_server::start() //jthread 3개 -> io 등록으로 변경
 {
     spdlog::info("ZMQ Server up.");
-
+    //socket 옵션
     sock_.set(zmq::sockopt::linger, 0);
     sock_.set(zmq::sockopt::rcvhwm, 30000);
     sock_.set(zmq::sockopt::rcvtimeo, 100); //recv 최대 100ms blocking
 
+    //모니터 함수
     monitor_.init(sock_, "inproc://zmqsvr-monitor");
     sock_.bind("tcp://*:9984");
 
+    //스레드 띄우기
     mon_th_ = std::jthread([this](std::stop_token st) {
         while (!st.stop_requested()) {
             (void)monitor_.check_event(100);
@@ -55,7 +57,7 @@ void zmq_server::stop()
 }
 
 void zmq_server::in_handler(std::stop_token st) {
-    // ZMQ 소켓 event 감지(poll) -> NUMS
+    // ZMQ 소켓 event 감지(poll) -> outq_에 패킷화해서 push
     while (!st.stop_requested()) {
         // zmq::pollitem_t items[] = {
         //     { static_cast<void*>(sock_), 0, ZMQ_POLLIN, 0 }
@@ -66,7 +68,7 @@ void zmq_server::in_handler(std::stop_token st) {
             do{
                 zmq::message_t msg;
                 sock_.recv(msg, zmq::recv_flags::none); //blocking인데 poll이후라 any recv_flags
-                recv_frames.push_back(std::move(msg)); 
+                recv_frames.emplace_back(std::move(msg)); 
             } while (sock_.get(zmq::sockopt::rcvmore));
 
             if (!recv_frames.empty()){
@@ -81,15 +83,24 @@ void zmq_server::in_handler(std::stop_token st) {
         // }
         //ROUTER
         while(auto reply = inq_.try_pop(st)){ //try_pop (없으면 계속 null 반환) > notify 기반 blocking pop(O)
-            auto j = reply->to_json();
-            std::string payload = j.dump();
+            
+            auto r = reply->to_json();
+            std::string payload = r.dump();
+            auto id = reply->get_identity();
 
-            sock_.send(reply->get_identity(), zmq::send_flags::sndmore);
-            sock_.send(zmq::message_t(0), zmq::send_flags::sndmore);
+            sock_.send(
+                zmq::buffer(id.data(), id.size()),
+                zmq::send_flags::sndmore
+            );
+            sock_.send(
+                zmq::message_t(0),
+                zmq::send_flags::sndmore
+            );
 
-            zmq::message_t msg(payload.size());
-            std::memcpy(msg.data(), payload.data(), payload.size());
-            sock_.send(msg, zmq::send_flags::none);
+            sock_.send(
+                zmq::buffer(payload.data(), payload.size()),
+                zmq::send_flags::none
+            );
         }
     }
 }

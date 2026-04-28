@@ -29,11 +29,15 @@ class numsworker
         ThreadSafeQueue<nums::Packet>& inq_; // NUMS -> ZMQ Client
         void outq_monitor(std::stop_token st); // smsc로 req
         void inq_monitor(std::stop_token st); // zmq client로 res
-        void numsworker::heartbeat_sender(std::stop_token st); //heartbeat_sender
+        void heartbeat_sender(std::stop_token st); //heartbeat_sender
+        std::optional<nums::Header> recvHeader();
+        std::optional<nums::Packet> recvMsg();
+        std::optional<nums::Body> recvBody(nums::Header h);
 
-        bool sendMsg(std::optional<nums::Packet> msg);
+        bool sendMsg(const nums::Packet& msg);
         bool send_all(int fd, const std::byte* data, size_t len);
-
+        void async_send(const nums::Packet& msg);
+            
         TcpClient smsc_; 
         std::string serv_host = "112.172.129.233"; //"127.0.0.1"
         uint16_t serv_port = 8500;

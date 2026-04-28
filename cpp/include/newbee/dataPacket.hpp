@@ -1,4 +1,5 @@
 #pragma once
+#include <zmq.hpp>
 #include <variant>
 #include <cstddef>
 #include "dataElement.hpp"
@@ -15,7 +16,7 @@ namespace nums {
 
     class Packet {
     public:
-        zmq::message_t identity_;
+        std::string identity_; // VS zmq::message_t
         Header header;
         Body body{
             std::monostate{}
@@ -126,15 +127,19 @@ namespace nums {
         }
         
         
-        //ZMQ Dealer/router type으로의 전환에 따른 identity 저장용 함수
-        void set_identity(zmq::message_t id_msg) { // const & ??
-            identity_ = std::move(id_msg);
-        }
-        const zmq::message_t& get_identity() const {
-            //매번 복사해서 반환 x, 참조로 반환
+        // Dealer/router type(ZMQ)으로의 전환에 따른 identity 저장용 함수
+        std::string_view get_identity() const { 
+            //복사하지 않고, 읽기 전용 view로 반환
             return identity_;
         }
-        
+
+        void set_identity(const zmq::message_t& id_msg) {
+            //값 변경 없이 객체에 저장
+            identity_.assign( //Packet 클래스 멤버 identity_(zmq::message_t)에 id_msg 복사
+                static_cast<const char*>(id_msg.data()),
+                id_msg.size()
+            );
+        }
 
     private:
         std::size_t body_size() const {

@@ -30,18 +30,17 @@ numsworker::~numsworker(){
 }
 
 void numsworker::stop(){
-    outq_thread_.request_stop(); //NUMS->SMSC
-    heartbeat_sender_.request_stop(); //heartbeat_sender_
+    outq_thread_.request_stop(); // NUMS->SMSC
+    heartbeat_sender_.request_stop(); // heartbeat_sender_
 }
 
-void numsworker::start(){
+void numsworker::start(){ //jthread -> io 등록으로 변경
     outq_thread_ = std::jthread([this](std::stop_token st) {
         outq_monitor(st);
     });
     heartbeat_sender_ = std::jthread([this](std::stop_token st) {
         heartbeat_sender(st);
     });
-
 }
 
 void numsworker::heartbeat_sender(std::stop_token st){
@@ -60,6 +59,7 @@ void numsworker::heartbeat_sender(std::stop_token st){
 
 //outq_ (smsc로 전송) - smsc 연결 재수립
 void numsworker::outq_monitor(std::stop_token st){
+    using namespace std::chrono_literals;
     while (!st.stop_requested()) {
         if(!connected_.load()){ //connected_ 초기값은 false고, 이에 따라 연결 재수립
             if(!smsc_.connect(serv_host, serv_port)){
@@ -77,16 +77,18 @@ void numsworker::outq_monitor(std::stop_token st){
     }
 }
 
-void async_send(){ //retry_map에 넣는 로직도 같이
+void numsworker::async_send(const nums::Packet& msg){
     //sendMsg() 호출
     //sendMsg() 성공 시 retry_map에 try_cnt=0, seq_num, send_time 기록
-    
+    if (sendMsg(msg)) {
+        // retry_map에 넣음
+    }
 }
 
 
 bool numsworker::sendMsg(const nums::Packet& msg){
     std::vector<std::byte> out(msg.total_size());
-    msg->serialize(out.data(), out.size()); 
+    msg.serialize(out.data(), out.size()); 
     if (!smsc_.send_all(out.data(), out.size())) { // 1 or 3 전송
         spdlog::error("msg send failed.");
         return false;
@@ -101,44 +103,51 @@ bool numsworker::sendMsg(const nums::Packet& msg){
 std::optional<nums::Packet> numsworker::recvMsg(){
     auto rep_h = recvHeader();
     if (!rep_h) return std::nullopt;
-    switch(rep_h.msg_type_enum()){
+    switch((*rep_h).msg_type_enum()){
         case MsgType::LINK:
-            nums::Packet ack(MsgType::LINK_ACK);
+            {nums::Packet ack(MsgType::LINK_ACK);
             sendMsg(ack);
             spdlog::info("LINK received, sending ACK");
-            return std::nullopt;
+            return std::nullopt;}
         case MsgType::LINK_ACK:
-            nums::Packet result{};
+            {nums::Packet result{};
             result.header = *rep_h;
             spdlog::info("LINK ACK received.\n", result.toString());
-            return result;
+            return result;}
         case MsgType::SN_REGINFO_ACK:
-            auto rep_b = recvBody(*rep_h);
-            auto next_h = recvHeader(); // 1 or 5 recv
-            if (!next_h) return std::nullopt;
-            if((*next_h).msg_type_enum() == MsgType::LINK){
-                nums::Packet ack(MsgType::LINK_ACK);
-                sendMsg(ack);
-                spdlog::info("LINK received, sending ACK");
-                return std::nullopt;
-            }else if((*next_h).msg_type_enum() == MsgType::REQ_RESULT){
-                auto next_b = recvBody(*next_h);
-                if (!next_b) return std::nullopt;
+            {
+                auto next_h = recvHeader(); // 1 or 5 recv
+                if (!next_h) return std::nullopt;
+                if((*next_h).msg_type_enum() == MsgType::LINK){
+                    nums::Packet ack(MsgType::LINK_ACK);
+                    sendMsg(ack);
+                    spdlog::info("LINK received, sending ACK");
+                    return std::nullopt;
+                }else if((*next_h).msg_type_enum() == MsgType::REQ_RESULT) {
+                    auto next_b = recvBody(*next_h);
+                    if (!next_b) return std::nullopt;
 
-                nums::Packet ack(MsgType::REQ_RESULT_ACK);
-                sendMsg(ack);
+                    nums::Packet ack(MsgType::REQ_RESULT_ACK);
+                    sendMsg(ack);
 
-                nums::Packet result{};
-                result.header = *next_h;
-                result.body = *next_b;
-                spdlog::info("report arrived.");
-                return result;
-            }else{
+                    nums::Packet result{};
+                    result.header = *next_h;
+                    result.body = *next_b;
+                    spdlog::info("report arrived.");
+                    return result;
+                } else{
+                    return std::nullopt;
+                }
+                break;
+            }
+        case MsgType::SN_REGINFO:
+        case MsgType::REQ_RESULT:
+        case MsgType::UNKNOWN:
+        default:
+            {
+                spdlog::warn("unexpected msg_type");
                 return std::nullopt;
             }
-            break;
-        default:
-            return std::nullopt;
     }
 }
 

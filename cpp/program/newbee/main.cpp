@@ -33,17 +33,34 @@ int main() {
     ThreadSafeQueue<nums::Packet> inq_;
 
     zmq_server svr(outq_, inq_);
-    svr.start(); //ZMQ Server
-
     numsworker wkr(outq_, inq_);
+
+    svr.start(); //ZMQ Server
     wkr.start(); //NUMS
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1200000));
-    svr.stop();
-    wkr.stop();
+    net::steady_timer t(io, std::chrono::seconds(20));
+    t.async_wait([&](const boost::system::error_code& ec) {
+        if (!ec) {
+            std::cout << "Time is up. Stopping servers..." << std::endl;
+            svr.stop();
+            wkr.stop();
+            s.cancel();
+            io.stop();
+        }
+    });
+
+    net::signal_set s(io, SIGINT, SIGTERM);
+    s.async_wait([&](const boost::system::error_code& ec, int) {
+        if (!ec) {
+            std::cout << "Interrupt received. Stopping servers..." << std::endl;
+            t.cancel();
+            svr.stop();
+            wkr.stop();
+            io.stop();
+        }
+    });
 
     io.run();
-    // t_outq_.join();
     return 0;
 }
 

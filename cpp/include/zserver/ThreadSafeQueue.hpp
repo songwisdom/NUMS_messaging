@@ -25,7 +25,7 @@ class ThreadSafeQueue {
         }
 
         //non-blocking pop
-        std::optional<T> try_pop() {
+        std::optional<T> try_pop(std::stop_token st) {
             std::lock_guard lock(mtx_); // 아주 짧은 시간 락
             if (q_.empty()) {
                 return std::nullopt; // 즉시 nullopt 반환
