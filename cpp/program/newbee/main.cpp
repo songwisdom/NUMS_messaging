@@ -27,20 +27,32 @@ namespace net = boost::asio;
 
 int main() {
     logging::log_init("NUMS");
+    net::io_context io;
 
     ThreadSafeQueue<nums::Packet> outq_;
     ThreadSafeQueue<nums::Packet> inq_;
 
     zmq_server svr(outq_, inq_);
-    svr.start();
-
     numsworker wkr(outq_, inq_);
-    wkr.start(); //NUMS
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(1200000));
+    svr.start();
+    wkr.start(); 
+
+    net::steady_timer t(io, std::chrono::seconds(20));
+    t.async_wait([&](const boost::system::error_code& ec) {
+        if (!ec) {
+            std::cout << "Time is up. Stopping servers..." << std::endl;
+            svr.stop();
+            wkr.stop();
+            s.cancel();
+            io.stop();
+        }
+    });
+
     svr.stop();
     wkr.stop();
 
+    io.run();
     return 0;
 }
 
