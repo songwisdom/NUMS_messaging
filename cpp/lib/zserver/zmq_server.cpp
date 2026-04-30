@@ -56,8 +56,6 @@ void zmq_server::stop()
     mon_th_.request_stop();
 }
 
-//async 
-
 void zmq_server::in_handler(std::stop_token st) {
     // ZMQ 소켓 event 감지(poll) -> outq_에 패킷화해서 push
     while (!st.stop_requested()) {
@@ -70,7 +68,7 @@ void zmq_server::in_handler(std::stop_token st) {
             do{
                 zmq::message_t msg;
                 sock_.recv(msg, zmq::recv_flags::none); 
-                //recv (none옵션:blocking, dontwait:non-blocking-busy)
+                //recv (none옵션: blocking, dontwait: non-blocking-busy)
                 recv_frames.emplace_back(std::move(msg)); 
             } while (sock_.get(zmq::sockopt::rcvmore));
 
