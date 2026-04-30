@@ -39,7 +39,7 @@ int main() {
     wkr.start(); //NUMS
 
     net::steady_timer t(io, std::chrono::seconds(20));
-    t.async_wait([&](const boost::system::error_code& ec) {
+    t.async_wait([&](const boost::system::error_code& ec) { //코루틴??
         if (!ec) {
             std::cout << "Time is up. Stopping servers..." << std::endl;
             svr.stop();

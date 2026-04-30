@@ -56,22 +56,27 @@ void zmq_server::stop()
     mon_th_.request_stop();
 }
 
+//async 
+
 void zmq_server::in_handler(std::stop_token st) {
     // ZMQ 소켓 event 감지(poll) -> outq_에 패킷화해서 push
     while (!st.stop_requested()) {
         // zmq::pollitem_t items[] = {
         //     { static_cast<void*>(sock_), 0, ZMQ_POLLIN, 0 }
         // };
-        // zmq::poll(items, 1, 100); // (socket 1개, 100ms wake&loop)
+        // zmq::poll(items, 1, 100s); // (socket 1개, 100ms wake&loop)
         // if (items[0].revents & ZMQ_POLLIN) {
             std::vector<zmq::message_t> recv_frames;
             do{
                 zmq::message_t msg;
-                sock_.recv(msg, zmq::recv_flags::none); //blocking인데 poll이후라 any recv_flags
+                sock_.recv(msg, zmq::recv_flags::none); 
+                //recv (none옵션:blocking, dontwait:non-blocking-busy)
                 recv_frames.emplace_back(std::move(msg)); 
             } while (sock_.get(zmq::sockopt::rcvmore));
 
-            if (!recv_frames.empty()){
+            if (recv_frames.size() < 2) { //예외 처리
+                spdlog::warn("invalid ROUTER message: frame_count={}", recv_frames.size());
+            }else{
                 auto& payload_msg = recv_frames.back();
                 auto p = nums::Packet::parse_json(
                     static_cast<const std::byte*>(payload_msg.data()),
