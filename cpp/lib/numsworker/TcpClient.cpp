@@ -27,7 +27,7 @@ bool TcpClient::connect(const std::string& ip, uint16_t port)
     }
     // timeout 설정
     timeval tv{};
-    tv.tv_sec = 5;
+    // tv.tv_sec = 5; 
     tv.tv_usec = 0;
     // 수신 타임아웃
     setsockopt(fd_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));

@@ -92,7 +92,7 @@ bool numsworker::sendMsg(const nums::Packet& msg){ //재전송 고려?
 //seq 오류처리. 내가 보낸 메시지에 대한 옳지 못한 응답에 대한 오류처리
 std::optional<nums::Packet> numsworker::recvMsg() {
     while(true){
-        auto rep_h = recvHeader();
+        auto rep_h = recvHeader(); //TIMEOUT X
         if (!rep_h) return std::nullopt;
         switch((*rep_h).msg_type_enum()){
              //‘class std::optional<nums::Header>’ has no member named ‘msg_type_enum’
