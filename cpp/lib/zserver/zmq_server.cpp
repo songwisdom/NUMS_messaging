@@ -61,11 +61,11 @@ void zmq_server::stop()
 void zmq_server::in_handler(std::stop_token st) {
     // ZMQ 소켓 event 감지(poll) -> outq_에 패킷화해서 push
     while (!st.stop_requested()) {
-        // zmq::pollitem_t items[] = {
-        //     { static_cast<void*>(sock_), 0, ZMQ_POLLIN, 0 }
-        // };
-        // zmq::poll(items, 1, 100s); // (socket 1개, 100ms wake&loop)
-        // if (items[0].revents & ZMQ_POLLIN) {
+        zmq::pollitem_t items[] = {
+            { static_cast<void*>(sock_), 0, ZMQ_POLLIN, 0 }
+        };
+        zmq::poll(items, 1, 100s); // (socket 1개, 100ms wake&loop)
+        if (items[0].revents & ZMQ_POLLIN) {
             std::vector<zmq::message_t> recv_frames;
             do{
                 zmq::message_t msg;
@@ -85,7 +85,7 @@ void zmq_server::in_handler(std::stop_token st) {
                 p.set_identity(std::move(recv_frames[0])); 
                 outq_.push_noti(std::move(p)); 
             }
-        // }
+        }
         //ROUTER
         while(auto reply = inq_.try_pop(st)){ //try_pop (없으면 계속 null 반환) > notify 기반 blocking pop(O)
             
