@@ -49,9 +49,6 @@ int main() {
         }
     });
 
-    svr.stop();
-    wkr.stop();
-
     io.run();
     return 0;
 }

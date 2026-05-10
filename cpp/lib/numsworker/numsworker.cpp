@@ -49,9 +49,8 @@ void numsworker::outq_monitor(std::stop_token st){
         }
         spdlog::info("Connected to SMSC.");
 
-        // recv 한번 하는 이유 :
-        // 연결 수립 시 SMSC에서 LINK 메시지 보내는 경우 있어서?
-        auto result = recvMsg();
+        // recv 한번 하는 이유 : 연결 수립 시 SMSC에서 LINK 메시지 보내는 경우 있음
+        auto result = recvMsg(std::chrono::milliseconds(0)); //TIMEOUT X 아닌가? (안보낼 수도 있잖슴)
         if(result.has_value()){
             spdlog::info("Initial LINK received after connect.{}\n", result->toString());
         }
@@ -64,7 +63,7 @@ void numsworker::outq_monitor(std::stop_token st){
             msg = *msg_opt;
         }
         if(sendMsg(msg)){ // 1, 3 send
-            auto result = recvMsg();
+            auto result = recvMsg(std::chrono::milliseconds(5000)); //TIMEOUT X
             if(result.has_value()){ // 2, 5 recv
                 inq_.push_noti(*result);
             }
@@ -90,9 +89,9 @@ bool numsworker::sendMsg(const nums::Packet& msg){ //재전송 고려?
 }
 
 //seq 오류처리. 내가 보낸 메시지에 대한 옳지 못한 응답에 대한 오류처리
-std::optional<nums::Packet> numsworker::recvMsg() {
+std::optional<nums::Packet> numsworker::recvMsg(std::optional<std::chrono::milliseconds> timeout) {
     while(true){
-        auto rep_h = recvHeader(); //TIMEOUT X
+        auto rep_h = recvHeader(timeout); //TIMEOUT X
         if (!rep_h) return std::nullopt;
         switch((*rep_h).msg_type_enum()){
              //‘class std::optional<nums::Header>’ has no member named ‘msg_type_enum’
@@ -146,9 +145,9 @@ std::optional<nums::Packet> numsworker::recvMsg() {
     }
 }
 
-std::optional<nums::Header> numsworker::recvHeader(){
+std::optional<nums::Header> numsworker::recvHeader(std::optional<std::chrono::milliseconds> timeout){
     std::vector<std::byte> header_buf(nums::Header::SIZE); 
-    if (!smsc_.read_exact(header_buf.data(), header_buf.size())) {
+    if (!smsc_.read_exact(header_buf.data(), header_buf.size(), timeout)) {
         spdlog::error("read header failed\n");
         return std::nullopt;
     }
@@ -160,8 +159,8 @@ std::optional<nums::Header> numsworker::recvHeader(){
 
 std::optional<nums::Body> numsworker::recvBody(nums::Header h){
     std::vector<std::byte> body_buf(h.get_msg_len());
-    if (!smsc_.read_exact(body_buf.data(), body_buf.size())) {
-        spdlog::error("[NUMS]read body failed\n"); // body 못읽음
+    if (!smsc_.read_exact(body_buf.data(), body_buf.size(), std::chrono::milliseconds(0))) { //TIMEOUT X
+        spdlog::error("[NUMS]read body failed\n");
         return std::nullopt;
     }
     nums::result_body b{};
