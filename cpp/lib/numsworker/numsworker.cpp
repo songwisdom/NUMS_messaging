@@ -50,7 +50,7 @@ void numsworker::outq_monitor(std::stop_token st){
         spdlog::info("Connected to SMSC.");
 
         // recv 한번 하는 이유 : 연결 수립 시 SMSC에서 LINK 메시지 보내는 경우 있음
-        auto result = recvMsg(std::chrono::milliseconds(0)); //TIMEOUT X 아닌가? (안보낼 수도 있잖슴)
+        auto result = recvMsg(0ms); //TIMEOUT X 아닌가? (안보낼 수도 있잖슴)
         if(result.has_value()){
             spdlog::info("Initial LINK received after connect.{}\n", result->toString());
         }
@@ -62,14 +62,28 @@ void numsworker::outq_monitor(std::stop_token st){
         } else{
             msg = *msg_opt;
         }
-        if(sendMsg(msg)){ // 1, 3 send
-            auto result = recvMsg(std::chrono::milliseconds(5000)); //TIMEOUT X
-            if(result.has_value()){ // 2, 5 recv
-                inq_.push_noti(*result);
+
+        if (sendMsg(msg)) { // 1, 3 send
+            auto result = recvMsg(5000ms);
+            if (!result.has_value()) {
+                spdlog::warn("recv response failed. retry once");
+                if (sendMsg(msg)) {
+                    result = recvMsg(5000ms);
+                } else {
+                    spdlog::error("Connection lost after retry send");
+                    smsc_.close();
+                    return;
+                }
             }
-        }else{
+            if (result.has_value()) {
+                inq_.push_noti(*result);
+            } else {
+                spdlog::error("recv response failed after retry");
+                smsc_.close();
+            }
+        } else {
             spdlog::error("Connection lost during send");
-            smsc_.close(); // 연결 끊김 처리
+            smsc_.close();
         }
     }
 }
@@ -101,9 +115,6 @@ std::optional<nums::Packet> numsworker::recvMsg(std::optional<std::chrono::milli
             case MsgType::LINK:
                 {
                     nums::Packet ack(MsgType::LINK_ACK);
-                    if(!sendMsg(ack)){
-                        //재전송까지 실패했을 경우
-                    }
                     spdlog::info("LINK received, sending ACK");
                     break;
                 }
@@ -157,9 +168,9 @@ std::optional<nums::Header> numsworker::recvHeader(std::optional<std::chrono::mi
     return rep_h; // 성공 시 객체 반환 (암시적으로 optional로 변환됨)
 }
 
-std::optional<nums::Body> numsworker::recvBody(nums::Header h){
+std::optional<nums::Body> numsworker::recvBody(nums::Header h){ // 안전하게 recv timeout(5s) VS 0s
     std::vector<std::byte> body_buf(h.get_msg_len());
-    if (!smsc_.read_exact(body_buf.data(), body_buf.size(), std::chrono::milliseconds(0))) { //TIMEOUT X
+    if (!smsc_.read_exact(body_buf.data(), body_buf.size(), std::chrono::milliseconds(0))) { 
         spdlog::error("[NUMS]read body failed\n");
         return std::nullopt;
     }
