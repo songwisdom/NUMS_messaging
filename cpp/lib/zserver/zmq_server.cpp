@@ -56,13 +56,13 @@ void zmq_server::stop()
     mon_th_.request_stop();
 }
 
-void zmq_server::in_handler(std::stop_token st) {
+void zmq_server::in_handler(std::stop_token st) { //ZMQ -> NUMS -> SMSC
     // ZMQ 소켓 event 감지(poll) -> outq_에 패킷화해서 push
     while (!st.stop_requested()) {
         zmq::pollitem_t items[] = {
             { static_cast<void*>(sock_), 0, ZMQ_POLLIN, 0 }
         };
-        zmq::poll(items, 1, 100s); // (socket 1개, 100ms wake&loop)
+        zmq::poll(items, 1, 100ms); // (socket 1개, 100ms wake&loop)
         if (items[0].revents & ZMQ_POLLIN) {
             std::vector<zmq::message_t> recv_frames;
             do{
@@ -86,7 +86,9 @@ void zmq_server::in_handler(std::stop_token st) {
         }
         //ROUTER
         while(auto reply = inq_.try_pop(st)){ //try_pop (없으면 계속 null 반환) > notify 기반 blocking pop(O)
-            
+            //inq에 reply 도착 이벤트 (poll을 깨우는 방법이 있다)
+
+            //zmq::socket_type::pair -> poll 대상을 2개
             auto r = reply->to_json();
             std::string payload = r.dump();
             auto id = reply->get_identity();
@@ -105,6 +107,12 @@ void zmq_server::in_handler(std::stop_token st) {
                 zmq::send_flags::none
             );
         }
+    }
+}
+
+void zmq_server::out_handler(std::stop_token st) { //SMSC -> NUMS -> ZMQ
+    while (!st.stop_requested()) {
+    
     }
 }
 
