@@ -74,7 +74,7 @@ void zmq_server::in_handler(std::stop_token st) { //ZMQ -> NUMS -> SMSC
 
             if (recv_frames.size() < 2) { //예외 처리
                 spdlog::warn("invalid ROUTER message: frame_count={}", recv_frames.size());
-            }else{
+            } else{
                 auto& payload_msg = recv_frames.back();
                 auto p = nums::Packet::parse_json(
                     static_cast<const std::byte*>(payload_msg.data()),
@@ -86,9 +86,7 @@ void zmq_server::in_handler(std::stop_token st) { //ZMQ -> NUMS -> SMSC
         }
         //ROUTER
         while(auto reply = inq_.try_pop(st)){ //try_pop (없으면 계속 null 반환) > notify 기반 blocking pop(O)
-            //inq에 reply 도착 이벤트 (poll을 깨우는 방법이 있다)
-
-            //zmq::socket_type::pair -> poll 대상을 2개
+            //다음 세 줄을 별도 스레드로 분리 
             auto r = reply->to_json();
             std::string payload = r.dump();
             auto id = reply->get_identity();
