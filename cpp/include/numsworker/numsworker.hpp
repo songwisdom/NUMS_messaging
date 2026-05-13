@@ -43,13 +43,3 @@ class numsworker
         uint16_t serv_port = 8500;
 };
 
-
-
-// void healthChkstart();
-// std::jthread health_checker_thread_;
-// void health_chker(std::stop_token st); // Health Checker
-// std::atomic<bool> connected_{false};
-// std::atomic<bool> reconnect_requested_{false};
-// std::atomic<bool> idle_mode{true}; //메시지 있으면 false
-// using clock = std::chrono::steady_clock;
-// std::atomic<clock::time_point> last_ok_{clock::now()};

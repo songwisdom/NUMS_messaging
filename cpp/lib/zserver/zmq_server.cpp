@@ -74,7 +74,7 @@ void zmq_server::in_handler(std::stop_token st) { //ZMQ -> NUMS -> SMSC
 
             if (recv_frames.size() < 2) { //예외 처리
                 spdlog::warn("invalid ROUTER message: frame_count={}", recv_frames.size());
-            } else{
+            } else {
                 auto& payload_msg = recv_frames.back();
                 auto p = nums::Packet::parse_json(
                     static_cast<const std::byte*>(payload_msg.data()),
@@ -114,100 +114,3 @@ void zmq_server::out_handler(std::stop_token st) { //SMSC -> NUMS -> ZMQ
     }
 }
 
-
-
-
-
-// 하나의 ZMQ socket은 하나의 스레드에서만 사용 -이유: zmq 소켓은 thread-safe 하지 않음
-// 여러 스레드에서 동시에 접근 x(데이터 레이스, 메시지 손실, UB..)
-// 따라서 각 소켓은 단일 스레드에서만 사용해야 함. 
-// 그럼 소켓 여러개 쓰는 경우는 뭐지?
-
-//identity 저장-[0]:주소, [1]:empty delimeter, back():payload(JSON)
-
-//========================밑부터는 REQ/REP, 동기 야매논블로킹========================
-
-//여기서 한번씩 socket read? 양방향 health check를 위해서?
-//다음 recv 전에 send 필요 (REQ REP 모델)
-//inq blocking pop
-
-/*
-const auto size = reply->total_size();
-zmq::message_t msg(size);
-reply->serialize(
-    static_cast<std::byte*>(msg.data()),
-    size
-);
-sock_.send(msg, zmq::send_flags::none);
-*/
-
-/* outq_ MONITORING (main 함수에 있던 녀석)
-std::thread t_outq_([&] { // MONITOR(outq_)
-        while (true) {
-            if (auto msg = svr.outq_.pop()) {
-                spdlog::info("[NUMS] outq - RES");
-            }
-        }
-    });
-*/
-
-/* stop_ 이 뭐였는지 알아내셈 (지금은 jthread로 바꾼 상태)
-    while (!stop_.load()) {
-        if (auto msg = outq_.pop()) { 
-            spdlog::info("[NUMS] outq - RES");
-        }
-    }
-    */
-
-/* std::string VS std::string_view
-   std::string s(
-        static_cast<const char*>(msg.data()), //raw bytes->nums::Packet
-        msg.size()
-    );
-*/    
-
-/*
-outq_thread_ = std::jthread(&zmq_server::outq_monitor, this);
-    inq_thread_ = std::jthread(&zmq_server::inq_monitor, this);
-
-*/
-
-// 밑 뭔말?
-// 메시지 없으면 막히는 걸 피하려면 timeout/poll을 써야 함 
-// 여기선 poll로 100ms마다 깨워서 stop 체크
-// -1(무한대기) 대신 timeout으로 돌려야 stop 가능
-
-
-//분기 필요 - zmq_client 에서 온 JSON인지 SMSC에서 온 raw bytes 인지
-// -> nums::Packet::parse_json / nums::Packet::parse_bytes
-//ㄴㄴ 분기 필요없음
-
-// nums::Packet& p = *msg; // 또는 msg.value()
-
-
-// Packet.header.seq_num 부여하고 완성된 Packet.header를 try_cnt,send_time과 함께 
-            // retry_map(unordered_map)에 put
-            // & SMSC로 send할 패킷 생성 및 send
-
-            // SFUNC(smsc 전송 && seq_num+=1) && retry_map에 put(send_time, seq_num)
-            // retry_map 에 push
-            // packet 생성 후 smsc로 send
-            // 기다림..
-            // 안오면 -> 재전송,retry_map update
-            // 오면 -> packet을 객체화 -> outq_.push()
-
-
-/*
-zmq_cli_monitor 함수 안에 있던 
-//밑 5줄 용도 : 소켓 여러개 감시하는 멀티플렉서에서 필요한 것. 지금은 단일소켓 처리
-        // zmq::pollitem_t items[] = { // 논블로킹 recv. 여러 socket 이벤트 처리
-        //     { sock_, 0, ZMQ_POLLIN, 0 }
-        // };
-        // zmq::poll(items, 1, std::chrono::milliseconds(100));
-        // if (!(items[0].revents & ZMQ_POLLIN)) continue;
-
-
-*/
-
-
-// std::move - 이후 기존객체 값 다시 읽으면 안됨, const 객체에 사용 불가
