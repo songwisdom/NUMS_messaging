@@ -41,5 +41,6 @@ class numsworker
         TcpClient smsc_; 
         std::string serv_host = "112.172.129.233"; //"127.0.0.1"
         uint16_t serv_port = 8500;
+        int retry_cnt = 0;
 };
 

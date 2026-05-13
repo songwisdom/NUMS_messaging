@@ -100,77 +100,98 @@ bool numsworker::sendMsg(const nums::Packet& msg){
 }
 
 //seq 오류처리. 내가 보낸 메시지에 대한 옳지 못한 응답에 대한 오류처리
-std::optional<nums::Packet> numsworker::recvMsg(){
-    auto rep_h = recvHeader();
-    if (!rep_h) return std::nullopt;
-    switch((*rep_h).msg_type_enum()){
-        case MsgType::LINK:
-            {nums::Packet ack(MsgType::LINK_ACK);
-            sendMsg(ack);
-            spdlog::info("LINK received, sending ACK");
-            return std::nullopt;}
-        case MsgType::LINK_ACK:
-            {nums::Packet result{};
-            result.header = *rep_h;
-            spdlog::info("LINK ACK received.\n", result.toString());
-            return result;}
-        case MsgType::SN_REGINFO_ACK:
-            {
-                auto next_h = recvHeader(); // 1 or 5 recv
-                if (!next_h) return std::nullopt;
-                if((*next_h).msg_type_enum() == MsgType::LINK){
+std::optional<nums::Packet> numsworker::recvMsg(const nums::Packet& sentmsg) {
+    // using namespace std::chrono_literals;
+    std::chrono::seconds timeout;
+    switch(sentmsg.header.msg_type_enum()){ // type 에 따라 timeout 설정
+        //sent 메시지 타입 1,3 ONLY (다른 것 올 수 없음)
+        case MsgType::LINK: //1
+            timeout = 10;
+            break;
+        case MsgType::SN_REGINFO: //3
+            timeout = 5;
+            break;
+        default:
+            timeout = 0;
+    }
+    while(true){
+        auto rep_h = recvHeader(timeout);
+        if (!rep_h) { //header recv 실패 시 재전송
+            if(retry_cnt_ < 1){
+                outq_.push_noti(sentmsg); // optional 객체였다면 * 로 꺼내야하는 게 맞고, 내 param은 const & 이니까 바로 전달 ok?
+                retry_cnt_++;
+            } else { //재전송 실패
+                retry_cnt_ = 0; //초기화
+                return std::nullopt; // std::optional<nums::Packet> 반환인데 이거 줘도 되나? 
+            }
+        }
+        switch((*rep_h).msg_type_enum()){
+            case MsgType::LINK: //SMSC에서 온 LNK
+                { 
                     nums::Packet ack(MsgType::LINK_ACK);
-                    sendMsg(ack);
-                    spdlog::info("LINK received, sending ACK");
-                    return std::nullopt;
-                }else if((*next_h).msg_type_enum() == MsgType::REQ_RESULT) {
-                    auto next_b = recvBody(*next_h);
-                    if (!next_b) return std::nullopt;
-
-                    nums::Packet ack(MsgType::REQ_RESULT_ACK);
-                    sendMsg(ack);
+                    outq_.push_noti(ack);
+                    break;
+                }
+            case MsgType::LINK_ACK: //내가 보낸 메시지에 대한 응답 오기전에 ACK가 오는 케이스가 없다고 가정
+                {
+                    nums::Packet result{};
+                    result.header = *rep_h;
+                    return result;
+                }
+            case MsgType::SN_REGINFO_ACK:
+                {
+                    timeout = 5;
+                    auto rep_b = recvBody(*rep_h, timeout);
+                    if (!rep_b) return std::nullopt; //body recv 실패 시 재전송 X
+                    break;
+                }
+            case MsgType::REQ_RESULT:
+                {
+                    timeout = 5;
+                    auto rep_b = recvBody(*rep_h, timeout);
+                    if (!rep_b) return std::nullopt; //body recv 실패 시 재전송 X
 
                     nums::Packet result{};
-                    result.header = *next_h;
-                    result.body = *next_b;
+                    result.header = *rep_h;
+                    result.body = *rep_b;
                     spdlog::info("report arrived.");
+                    nums::Packet ack(MsgType::REQ_RESULT_ACK);
+                    outq_.push_noti(ack); //outq_.push_noti(ack) vs sendMsg(ack);
                     return result;
-                } else{
-                    return std::nullopt;
                 }
-                break;
-            }
-        case MsgType::SN_REGINFO:
-        case MsgType::REQ_RESULT:
-        case MsgType::UNKNOWN:
-        default:
-            {
-                spdlog::warn("unexpected msg_type");
-                return std::nullopt;
-            }
+            default:
+                {
+                    spdlog::error("Unknown message type received.");
+                    nums::Packet result{};
+                    result.header = *rep_h;
+                    result.body = {};
+                    return result;
+                }
+        }
     }
 }
 
-std::optional<nums::Header> numsworker::recvHeader(){
-    std::vector<std::byte> header_buf(nums::Header::SIZE); 
-    if (!smsc_.read_exact(header_buf.data(), header_buf.size())) {
+std::optional<nums::Header> numsworker::recvHeader(std::optional<std::chrono::milliseconds> timeout){
+    std::vector<std::byte> buf(nums::Header::SIZE); 
+    if (!smsc_.read_exact(buf.data(), buf.size(), timeout)) {
         spdlog::error("read header failed\n");
         return std::nullopt;
     }
     nums::Header rep_h{};
-    rep_h.deserialize(header_buf.data());
+    rep_h.deserialize(buf.data());
     spdlog::info("Header received:{}\n", rep_h.toString());
     return rep_h; // 성공 시 객체 반환 (암시적으로 optional로 변환됨)
 }
 
-std::optional<nums::Body> numsworker::recvBody(nums::Header h){
-    std::vector<std::byte> body_buf(h.get_msg_len());
-    if (!smsc_.read_exact(body_buf.data(), body_buf.size())) {
-        spdlog::error("[NUMS]read body failed\n"); // body 못읽음
+std::optional<nums::Body> numsworker::recvBody(nums::Header h,std::optional<std::chrono::milliseconds> timeout){ 
+    // 안전하게 recv timeout(5s) VS 0s
+    std::vector<std::byte> buf(h.get_msg_len());
+    if (!smsc_.read_exact(buf.data(), buf.size(), timeout)) { 
+        spdlog::error("read body failed\n");
         return std::nullopt;
     }
     nums::result_body b{};
-    b.deserialize(body_buf.data());
+    b.deserialize(buf.data());
     spdlog::info("Body received:{}\n", b.toString());
     return b;
 }
@@ -184,6 +205,12 @@ bool send_all(int fd, const std::byte* data, size_t len) {
     }
     return true;
 }
+
+
+// ‘class std::optional<nums::Header>’ has no member named ‘msg_type_enum’
+// 윗줄 오류 원인: optional 객체에서 Header 객체 꺼내는 과정 필요.
+// *rep_h.msg_type_enum()
+// (*rep_h).msg_type_enum() 또는 rep_h->msg_type_enum()
 
 // 참조자(const &) 사용 - Optional(std::optional<nums::Packet>) 대신 
 //nullopt이 전달될 염려는 없지만 const nums::Packet& 로 함수 시그니처를 바꾸는 것이 안전&깔끔
@@ -357,7 +384,6 @@ bool numsworker::send_and_recv(std::optional<nums::Packet> msg) {
 // NUMS->SMSC (1,3) NUMS<-SMSC(2,4,5), NUMS->SMSC(6)
 
 //내가 기대하는 응답/이벤트를 하나 처리할 때까지 돈다
-
 
 //numsworker 객체의 멤버를 사용하려면 앞에 '객체::'를 붙여야하는구나
 

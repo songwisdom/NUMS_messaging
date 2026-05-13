@@ -27,8 +27,7 @@ bool TcpClient::connect(const std::string& ip, uint16_t port)
     }
     // timeout 설정
     timeval tv{};
-    tv.tv_sec = 5;
-    tv.tv_usec = 0;
+    tv.tv_usec = 0; //TIMEOUT 비활성화(blocking)
     // 수신 타임아웃
     setsockopt(fd_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv));
     return true;
@@ -49,11 +48,36 @@ bool TcpClient::send_all(const std::byte* data, std::size_t len)
 }
 
 
-bool TcpClient::read_exact(std::byte* buf, size_t len)
+bool TcpClient::read_exact(std::byte* buf, size_t len, std::optional<std::chrono::milliseconds> timeout)
 {
+    //std::nullopt이면 blocking, 0이면 non-blocking, 그 외 timeout
+    if(timeout.has_value()){
+        if(*timeout == std::chrono::milliseconds(0)){// non-blocking
+            flags = MSG_DONTWAIT; 
+        } else { // non-blocking(timeout)
+            timeval tv{};
+            tv.tv_sec= static_cast<time_t>(timeout->count() / 1000);
+            tv.tv_usec = static_cast<suseconds_t>((timeout->count() % 1000) * 1000);
+            if(::setsockopt(fd_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0){
+                spdlog::error("set SO_RCVTIMEO failed errno={} ({})", errno, strerror(errno));
+                return false;
+            }
+            flags = 0;
+        }
+    } else { //blocking
+        timeval tv{};
+        tv.tv_sec = 0;
+        tv.tv_usec = 0;
+        if (::setsockopt(fd_, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
+            spdlog::error("clear SO_RCVTIMEO failed errno={} ({})", errno, strerror(errno));
+            return false;
+        }
+        flags = 0;
+    }
+
     size_t received = 0;
     while (received < len){
-        ssize_t n = ::recv(fd_, buf + received, len - received, 0);
+        ssize_t n = ::recv(fd_, buf + received, len - received, flags);
         if (n > 0) {
             received += static_cast<size_t>(n);
             continue;

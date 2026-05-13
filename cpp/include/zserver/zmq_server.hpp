@@ -17,7 +17,6 @@ class zmq_server
         void start();
         void stop();
     private:
-        ThreadSafeQueue<nums::Packet> queue_;
         ThreadSafeQueue<nums::Packet>& outq_; // NUMS -> SMSC 
         ThreadSafeQueue<nums::Packet>& inq_; // ZMQ_CLI <- NUMS
 
