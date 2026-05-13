@@ -54,7 +54,7 @@ bool TcpClient::read_exact(std::byte* buf, size_t len, std::optional<std::chrono
     if(timeout.has_value()){
         if(*timeout == std::chrono::milliseconds(0)){// non-blocking
             flags = MSG_DONTWAIT; 
-        } else{ // non-blocking(timeout)
+        } else { // non-blocking(timeout)
             timeval tv{};
             tv.tv_sec= static_cast<time_t>(timeout->count() / 1000);
             tv.tv_usec = static_cast<suseconds_t>((timeout->count() % 1000) * 1000);
@@ -64,7 +64,7 @@ bool TcpClient::read_exact(std::byte* buf, size_t len, std::optional<std::chrono
             }
             flags = 0;
         }
-    }else{ //blocking
+    } else { //blocking
         timeval tv{};
         tv.tv_sec = 0;
         tv.tv_usec = 0;

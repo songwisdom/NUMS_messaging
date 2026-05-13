@@ -40,7 +40,6 @@ void numsworker::start(){
 }
 
 void numsworker::outq_monitor(std::stop_token st){
-    using namespace std::chrono_literals;
     //zmq client -> sendMsg
     while (!st.stop_requested()) {
         while (!smsc_.connect(serv_host, serv_port)) {
@@ -50,7 +49,7 @@ void numsworker::outq_monitor(std::stop_token st){
         spdlog::info("Connected to SMSC.");
 
         // recv 한번 하는 이유 : 연결 수립 시 SMSC에서 LINK 메시지 보내는 경우 있음
-        auto result = recvMsg(0ms); //TIMEOUT X 아닌가? (안보낼 수도 있잖슴)
+        auto result = recvMsg(0ms); //no wait
         if(result.has_value()){
             spdlog::info("Initial LINK received after connect.{}\n", result->toString());
         }
@@ -64,21 +63,13 @@ void numsworker::outq_monitor(std::stop_token st){
         }
 
         if (sendMsg(msg)) { // 1, 3 send
-            auto result = recvMsg(5000ms);
-            if (!result.has_value()) {
-                spdlog::warn("recv response failed. retry once");
-                if (sendMsg(msg)) {
-                    result = recvMsg(5000ms);
-                } else {
-                    spdlog::error("Connection lost after retry send");
-                    smsc_.close();
-                    return;
-                }
-            }
+            if(msg.header.msg_type_enum() == MsgType::LINK_ACK || msg.header.msg_type_enum() == MsgType::REQ_RESULT_ACK)
+                continue; // ACK 보내는 경우 recvMsg X
+            auto result = recvMsg(msg);
             if (result.has_value()) {
                 inq_.push_noti(*result);
-            } else {
-                spdlog::error("recv response failed after retry");
+            }else{ // 재전송 실패 or recvBody timeout
+                spdlog::error("Failed to receive response for sent message.");
                 smsc_.close();
             }
         } else {
@@ -89,7 +80,7 @@ void numsworker::outq_monitor(std::stop_token st){
 }
 
 
-bool numsworker::sendMsg(const nums::Packet& msg){ //재전송 고려?
+bool numsworker::sendMsg(const nums::Packet& msg){
     std::vector<std::byte> out(msg.total_size());
     msg.serialize(out.data(), out.size()); //->와 . : 포인터->멤버 접근, 객체->멤버 접근
     if (!smsc_.send_all(out.data(), out.size())) { // 1 or 3 전송
@@ -103,45 +94,63 @@ bool numsworker::sendMsg(const nums::Packet& msg){ //재전송 고려?
 }
 
 //seq 오류처리. 내가 보낸 메시지에 대한 옳지 못한 응답에 대한 오류처리
-std::optional<nums::Packet> numsworker::recvMsg(std::optional<std::chrono::milliseconds> timeout) {
+std::optional<nums::Packet> numsworker::recvMsg(const nums::Packet& sentmsg) {
+    // using namespace std::chrono_literals;
+    std::chrono::seconds timeout;
+    switch(sentmsg.header.msg_type_enum()){ // type 에 따라 timeout 설정
+        //sent 메시지 타입 1,3 ONLY (다른 것 올 수 없음)
+        case MsgType::LINK: //1
+            timeout = 10;
+            break;
+        case MsgType::SN_REGINFO: //3
+            timeout = 5;
+            break;
+        default:
+            timeout = 0;
+    }
     while(true){
-        auto rep_h = recvHeader(timeout); //TIMEOUT X
-        if (!rep_h) return std::nullopt;
+        auto rep_h = recvHeader(timeout);
+        if (!rep_h) { //header recv 실패 시 재전송
+            if(retry_cnt_ < 1){
+                outq_.push_noti(sentmsg); // optional 객체였다면 * 로 꺼내야하는 게 맞고, 내 param은 const & 이니까 바로 전달 ok?
+                retry_cnt_++;
+            } else { //재전송 실패
+                retry_cnt_ = 0; //초기화
+                return std::nullopt; // std::optional<nums::Packet> 반환인데 이거 줘도 되나? 
+            }
+        }
         switch((*rep_h).msg_type_enum()){
-             //‘class std::optional<nums::Header>’ has no member named ‘msg_type_enum’
-            //윗줄 오류 원인: optional 객체에서 Header 객체 꺼내는 과정 필요.
-            // *rep_h.msg_type_enum()
-            // (*rep_h).msg_type_enum() 또는 rep_h->msg_type_enum()
-            case MsgType::LINK:
-                {
+            case MsgType::LINK: //SMSC에서 온 LNK
+                { 
                     nums::Packet ack(MsgType::LINK_ACK);
-                    spdlog::info("LINK received, sending ACK");
+                    outq_.push_noti(ack);
                     break;
                 }
-            case MsgType::LINK_ACK:
-                // (내가 보낸 메시지에 대한 응답 오기전에 ACK가 오는 케이스가 없다고 가정)
+            case MsgType::LINK_ACK: //내가 보낸 메시지에 대한 응답 오기전에 ACK가 오는 케이스가 없다고 가정
                 {
                     nums::Packet result{};
                     result.header = *rep_h;
-                    spdlog::info("LINK ACK received.\n");
                     return result;
                 }
             case MsgType::SN_REGINFO_ACK:
                 {
-                    auto rep_b = recvBody(*rep_h);
-                    if (!rep_b) return std::nullopt; //실패 시 return
+                    timeout = 5;
+                    auto rep_b = recvBody(*rep_h, timeout);
+                    if (!rep_b) return std::nullopt; //body recv 실패 시 재전송 X
                     break;
                 }
             case MsgType::REQ_RESULT:
                 {
-                    auto rep_b = recvBody(*rep_h);
-                    if (!rep_b) return std::nullopt;
+                    timeout = 5;
+                    auto rep_b = recvBody(*rep_h, timeout);
+                    if (!rep_b) return std::nullopt; //body recv 실패 시 재전송 X
+
                     nums::Packet result{};
                     result.header = *rep_h;
                     result.body = *rep_b;
                     spdlog::info("report arrived.");
                     nums::Packet ack(MsgType::REQ_RESULT_ACK);
-                    sendMsg(ack);
+                    outq_.push_noti(ack); //outq_.push_noti(ack) vs sendMsg(ack);
                     return result;
                 }
             default:
@@ -157,25 +166,26 @@ std::optional<nums::Packet> numsworker::recvMsg(std::optional<std::chrono::milli
 }
 
 std::optional<nums::Header> numsworker::recvHeader(std::optional<std::chrono::milliseconds> timeout){
-    std::vector<std::byte> header_buf(nums::Header::SIZE); 
-    if (!smsc_.read_exact(header_buf.data(), header_buf.size(), timeout)) {
+    std::vector<std::byte> buf(nums::Header::SIZE); 
+    if (!smsc_.read_exact(buf.data(), buf.size(), timeout)) {
         spdlog::error("read header failed\n");
         return std::nullopt;
     }
     nums::Header rep_h{};
-    rep_h.deserialize(header_buf.data());
+    rep_h.deserialize(buf.data());
     spdlog::info("Header received:{}\n", rep_h.toString());
     return rep_h; // 성공 시 객체 반환 (암시적으로 optional로 변환됨)
 }
 
-std::optional<nums::Body> numsworker::recvBody(nums::Header h){ // 안전하게 recv timeout(5s) VS 0s
-    std::vector<std::byte> body_buf(h.get_msg_len());
-    if (!smsc_.read_exact(body_buf.data(), body_buf.size(), std::chrono::milliseconds(0))) { 
-        spdlog::error("[NUMS]read body failed\n");
+std::optional<nums::Body> numsworker::recvBody(nums::Header h,std::optional<std::chrono::milliseconds> timeout){ 
+    // 안전하게 recv timeout(5s) VS 0s
+    std::vector<std::byte> buf(h.get_msg_len());
+    if (!smsc_.read_exact(buf.data(), buf.size(), timeout)) { 
+        spdlog::error("read body failed\n");
         return std::nullopt;
     }
     nums::result_body b{};
-    b.deserialize(body_buf.data());
+    b.deserialize(buf.data());
     spdlog::info("Body received:{}\n", b.toString());
     return b;
 }
@@ -189,6 +199,12 @@ bool send_all(int fd, const std::byte* data, size_t len) {
     }
     return true;
 }
+
+
+// ‘class std::optional<nums::Header>’ has no member named ‘msg_type_enum’
+// 윗줄 오류 원인: optional 객체에서 Header 객체 꺼내는 과정 필요.
+// *rep_h.msg_type_enum()
+// (*rep_h).msg_type_enum() 또는 rep_h->msg_type_enum()
 
 // 참조자(const &) 사용 - Optional(std::optional<nums::Packet>) 대신 
 //nullopt이 전달될 염려는 없지만 const nums::Packet& 로 함수 시그니처를 바꾸는 것이 안전&깔끔
