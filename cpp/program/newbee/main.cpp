@@ -18,7 +18,6 @@
 #include <stop_token>
 
 #include "common.h"
-//#include "zmq.hpp"
 #include "zmq_server.hpp"
 #include "ThreadSafeQueue.hpp"
 #include "dataPacket.hpp"
@@ -27,131 +26,72 @@ namespace net = boost::asio;
 
 int main() {
     logging::log_init("NUMS");
-    net::io_context io;
+    net::io_context io_;
 
-    ThreadSafeQueue<nums::Packet> outq_;
     ThreadSafeQueue<nums::Packet> inq_;
-
-    zmq_server svr(outq_, inq_);
-    numsworker wkr(outq_, inq_);
-
-    svr.start(); //ZMQ Server
+    
+    numsworker wkr(io_, retry_map, inq_);
+    zmq_server svr(io_, inq_,
+        [&](nums::Packet p) { 
+            wkr.handle_request(std::move(p)); // 콜백 - 객체참조캡처 vs shared_ptr 
+        }
+    );
+    
     wkr.start(); //NUMS
+    svr.start(); //ZMQ Server
 
-    net::steady_timer t(io, std::chrono::seconds(20));
+    net::steady_timer t(io_, std::chrono::seconds(20));
     t.async_wait([&](const boost::system::error_code& ec) { //코루틴??
         if (!ec) {
             std::cout << "Time is up. Stopping servers..." << std::endl;
-            svr.stop();
             wkr.stop();
+            svr.stop();
             s.cancel();
-            io.stop();
+            io_.stop();
         }
     });
 
-    net::signal_set s(io, SIGINT, SIGTERM);
+    net::signal_set s(io_, SIGINT, SIGTERM);
     s.async_wait([&](const boost::system::error_code& ec, int) {
         if (!ec) {
             std::cout << "Interrupt received. Stopping servers..." << std::endl;
             t.cancel();
-            svr.stop();
             wkr.stop();
-            io.stop();
+            svr.stop();
+            io_.stop();
         }
     });
 
-    io.run();
+    io_.run();
     return 0;
 }
 
 
-/*
-std::jthread t_zsvr([&svr]() { // ZMQ_SERVER
-    svr.start();
-});
-*/
+// poll로 event 감지 후 json parsing, Packet화 해서 io.post
+// inq_ 모니터링-zmq client 에 응답
+// thread 수 : 2개 (mon_th_, in_handler_th_)
 
 /*
-    (선택사항)
-    객체를 스마트포인터로 생성하는 방식으로 수명 관리
-    auto svr = std::make_shared<zmq_server>();
-    std::thread t_zsvr([svr]{
-        svr->start();
-    });
-*/
-
-//zmq_rcver, smsc_rcver 두개 -> epoll?
-/*
-    std::jthread th_timer(timer);
-    std::jthread th_zmqrcver(zmqrcver);
-    
-    std::this_thread::sleep_for(std::chrono::milliseconds(15000)); 
-    // 중단 요청, jt 소멸 시 자동으로 조인
-    th_timer.request_stop();
-    th_zmqrcver.request_stop();
-*/
-
-/*
-//비동기
-//inq_ 모니터링 -> 무조건 다 smsc 로 보냄. 5가 왜있는지 모르겠음 zmq_cli 에
-//일괄 smsc로 전송(type : 1,3,6)
-net::awaitable<void> inq_observer(){
-    auto exec = co_await net::this_coro::executor;
-    net::steady_timer t(exec);
-    while(true){
-        t.expires_after(std::chrono::seconds(2));
-        co_await t.async_wait(net::use_awaitable);
-        if(!inq_.empty()){
-            auto x = inq_.pop();
-            retry_map.push(x); // try_cnt, seq_num, send_time
-        }
+zmq_server svr(io_, inq_,
+    [&](nums::Packet p) { 
+        wkr.handle_request(std::move(p)); // 참조캡처
     }
-}
+);
+->수명 주의(람다 실행 시 wkr가 소멸됐다면 dangling reference)->std::shared_ptr로 해결 가능하지만,
+main 함수에서 wkr과 svr의 수명은 프로그램 전체이므로 dangling reference는 발생하지 않음
+이런 경우 shared_ptr로 감싸는 것은 오히려 불필요한 참조 카운트 관리 비용 발생시킴(오버헤드),
+설계가 느슨해짐, 의존성이 숨겨질 수 있음(“왜 이 객체가 여기서도 살아있지?”)
 
-//비동기
-net::awaitable<void> zmq_rcver(){ // epoll(멀티플렉싱 - 외부 client N개)
-// (zmq server bind)
-    
-// 메시지(JSON, msg type(3 or ?)) JSON 들어오면
-// JSON->객체->패킷 후 inq_에 put
-//connect 한 곳에서 데이터 들어오면 JSON->패킷화해서 전역 inq_에 put
-//동시에 zmq_req_processor 호출
-
-}
-
-//비동기
-void smsc_rcver(){
-    //smsc로부터 패킷 받음 (type 2,4,5)
-    //패킷->객체 후 seq_num이 retrymap에 있다면 retrymap.remove(seq_num) - 보통 2,4 type
-    //switch -> type 5라면 JSON화 시킨 후 zmq_client 에게 전송, type 6을 만들어서 전역 inq_에 put
-}
-
-//비동기
-void retrymap_observer(){
-    //retrymap (unordered map)
-    //retrymap.send_time 이 10초 이전&&try_cnt=1 인 데이터를 smsc로 재전송
-    //retrymap.send_time 이 10초 이전&&try_cnt=2 -> connection 해제 후 재수립
-}
-
-//비동기
-net::awaitable<void> health_timer(net::io_context& io){
-    auto exec = co_await net::this_coro::executor;
-    net::steady_timer t(exec);
-    while(true){
-        t.expires_after(std::chrono::seconds(3));
-        co_await t.async_wait(net::use_awaitable); //expire 걸어놓고 기다리게 함
-        if(!runsc::health_chker()){
-            std::cout << "fatal error → stopping program\n";
-            io.stop(); //이벤트루프 종료
-            co_return;
-        }
+auto wkr = std::make_shared<numsworker>(io_, retry_map, inq_);
+zmq_server svr(io_, inq_,
+    [wkr](nums::Packet p) {
+        wkr->handle_request(std::move(p));
     }
-}
+);
 
-net::co_spawn(io, health_timer(io), net::detached);
+결론 : wkr가 svr보다 확실히 오래 산다: 지금처럼 참조 캡처 유지
+콜백이 더 오래 살아서 수명이 불명확하다: shared_ptr 고려
+단, shared_ptr를 쓰면 wkr를 캡처하는 람다도 wkr->handle_request(...) 형태로 바꿔야 함
+
 
 */
-
-
-//사용된 queue.pop(),read_exact 전부 블로킹이라 메시지 없으면 멈춰있음
-//health chker 스레드 필요

@@ -18,12 +18,12 @@ namespace nums {
 
     class Packet {
     public:
-        std::string identity_; // VS zmq::message_t
+        //int seq_num;
+        std::vector<std::byte> identity_;
         Header header;
         Body body{
             std::monostate{}
         };
-        //int seq_num;
 
         Packet() = default;
 
@@ -138,17 +138,23 @@ namespace nums {
         
         
         // Dealer/router type(ZMQ)으로의 전환에 따른 identity 저장용 함수
-        std::string_view get_identity() const { 
-            //복사하지 않고, 읽기 전용 view로 반환
+        std::vector<std::byte> get_identity() const { 
+            /*identity_ 를 std::string 형으로 뒀을 때
+            string_view : 복사하지 않고, 읽기 전용 view로 반환*/
             return identity_;
         }
 
         void set_identity(const zmq::message_t& id_msg) {
             //값 변경 없이 객체에 저장
+            /* identity_ 를 std::string 형으로 뒀을 때
             identity_.assign( //Packet 클래스 멤버 identity_(zmq::message_t)에 id_msg 복사
                 static_cast<const char*>(id_msg.data()),
                 id_msg.size()
             );
+            */
+            // identity_ 를 std::vector<std::byte> 형으로 뒀을 때
+            const auto* data  = static_cast<const std::byte*>(id_msg.data());
+            identity_.assign(data , data + id_msg.size());
         }
 
         static std::string_view result_desc(int code) {
@@ -180,4 +186,3 @@ namespace nums {
         }
     };
 };
-//packet 만들 때 msg_type 보고 Body 타입부터 정해서 Packet 생성
