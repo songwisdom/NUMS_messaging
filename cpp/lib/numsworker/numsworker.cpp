@@ -46,7 +46,7 @@ void numsworker::start(){ //jthread -> io 등록으로 변경
 
 void numsworker::handle_request(nums::Packet p){
     //smsc_.async_send
-    //retry_map에 try_cnt=0, seq_num, send_time 기록
+    //retry_map에 try_cnt=0, seq_num, send_time put
 }
 
 void numsworker::async_send(const nums::Packet& msg){
