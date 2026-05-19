@@ -33,12 +33,7 @@ int main() {
     numsworker wkr(io_, retry_map, inq_);
     zmq_server svr(io_, inq_,
         [&](nums::Packet p) { 
-            wkr.handle_request(std::move(p)); // 콜백 - 객체참조캡처 vs shared_ptr 
-            // 허쉬 : wkr 생성 없이 wkr::handle_request()로 바로 호출하는 방법도 있긴 한데,
-            // handle_request가 멤버 함수이므로 wkr 객체 필요.
-            // static 함수로 바꾸면 가능하긴 함. 
-            // 하지만, 멤버 함수로 두는 게 객체 지향적 설계에 더 맞음.
-            // 지금처럼 참조 캡처 유지
+            wkr.handle_request(std::move(p)); 
         }
     );
     
@@ -70,6 +65,15 @@ int main() {
     io_.run();
     return 0;
 }
+
+
+
+// 콜백 - 객체참조캡처 vs shared_ptr vs static
+// wkr 생성 없이 wkr::handle_request()로 바로 호출 혹은 static 함수로 바꾸면 가능하긴 함. 
+// 하지만, 상태변수 공유 어렵고, 멤버 함수로 두는 게 객체 지향적 설계에 더 맞음.
+// 지금처럼 참조 캡처 유지
+
+
 
 
 // poll로 event 감지 후 json parsing, Packet화 해서 io.post

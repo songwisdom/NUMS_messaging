@@ -82,8 +82,11 @@ void zmq_server::in_handler(std::stop_token st) {
                     static_cast<const std::byte*>(payload_msg.data()),
                     payload_msg.size()
                 );
-                p.set_identity(recv_frames[0]); //std::move (모르고 갈겨둔 move)
-                net::post(io_, [this, p = std::move(p)]() mutable { //io_context에 콜백 등록
+                p.set_identity(recv_frames[0]);
+                net::post(io_, [this, p = std::move(p)]() mutable { 
+                    // 폭주하면 ex. 초당 10만건, 
+                    // io_context에 너무 많은 작업이 쌓이는 문제 발생할 수 있음. 
+                    // 그를 방지하기 위해, 작업 큐의 크기를 제한하거나, 작업 처리 속도를 조절하는 등의 추가적인 로직이 필요할 수 있음.
                     req_handler_(std::move(p)); 
                 });
             }
